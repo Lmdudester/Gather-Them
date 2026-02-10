@@ -49,6 +49,15 @@
 
         <button type="submit" class="btn btn-primary">Analyze Deck</button>
     </form>
+
+    <div class="db-management">
+        <h2>Database Management</h2>
+        <p class="subtitle">Download the latest card data from MTGJSON. The site will be unavailable during the update.</p>
+        <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">Update Database</button>
+        </form>
+    </div>
 </div>
 {% endblock %}
 

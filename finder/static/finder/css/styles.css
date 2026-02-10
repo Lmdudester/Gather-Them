@@ -102,6 +102,18 @@ h1 {
     color: var(--accent-hover);
 }
 
+.alert-success {
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid var(--success);
+    color: #81c784;
+}
+
+.alert-warning {
+    background: rgba(255, 152, 0, 0.15);
+    border: 1px solid var(--warning);
+    color: #ffb74d;
+}
+
 /* === Forms === */
 .deck-form {
     max-width: 800px;
@@ -734,6 +746,115 @@ a.card-item {
     margin-top: 2rem;
     padding-top: 1rem;
     border-top: 1px solid var(--border);
+}
+
+/* === Database Management === */
+.db-management {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    max-width: 800px;
+}
+
+.db-management h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.db-management .subtitle {
+    margin-bottom: 1rem;
+}
+
+/* === Maintenance Page === */
+.maintenance-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+}
+
+.maintenance-card {
+    text-align: center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 3rem 2.5rem;
+    max-width: 480px;
+    width: 100%;
+}
+
+.maintenance-card h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.maintenance-icon {
+    margin-bottom: 1.5rem;
+}
+
+.maintenance-spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.maintenance-detail {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.maintenance-progress {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.maintenance-progress-bar {
+    height: 100%;
+    width: 30%;
+    background: var(--accent);
+    border-radius: 2px;
+    animation: progress-slide 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+    0%   { width: 0%; margin-left: 0; }
+    50%  { width: 40%; margin-left: 30%; }
+    100% { width: 0%; margin-left: 100%; }
+}
+
+.maintenance-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.maintenance-dots::after {
+    content: '';
+    animation: dots 1.5s steps(3) infinite;
+}
+
+@keyframes dots {
+    0%   { content: ''; }
+    33%  { content: '.'; }
+    66%  { content: '..'; }
+    100% { content: '...'; }
+}
+
+.maintenance-status-done {
+    color: var(--success);
+    font-weight: 600;
 }
 
 /* === Footer === */

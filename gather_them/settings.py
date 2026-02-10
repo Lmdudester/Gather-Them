@@ -48,11 +48,16 @@ INSTALLED_APPS = [
     'finder',
 ]
 
-# MTGJSON Database Path
+# MTGJSON Database
 MTGJSON_DB_PATH = os.environ.get('MTGJSON_DB_PATH')
+MTGJSON_DOWNLOAD_URL = os.environ.get(
+    'MTGJSON_DOWNLOAD_URL',
+    'https://mtgjson.com/api/v5/AllPrintings.sqlite.zip',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'finder.middleware.MaintenanceMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

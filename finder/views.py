@@ -1,13 +1,40 @@
 import json
+import logging
 import math
 
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 from .forms import DecklistForm
+from .middleware import is_maintenance_mode, set_maintenance_mode
 from .services.card_lookup import get_set_cards, lookup_cards
+from .services.db_updater import DatabaseUpdateError, update_database
 from .services.deck_parser import parse_decklist
 from .services.set_filter import filter_cards_by_tags
 from .services.theme_extractor import extract_themes
+
+logger = logging.getLogger(__name__)
+
+@require_POST
+def update_db(request):
+    """Download and replace the MTGJSON database."""
+    if is_maintenance_mode():
+        messages.warning(request, 'A database update is already in progress.')
+        return redirect('finder:index')
+
+    set_maintenance_mode(True)
+    try:
+        update_database()
+        messages.success(request, 'Database updated successfully.')
+    except DatabaseUpdateError as e:
+        logger.error('Database update failed: %s', e)
+        messages.error(request, f'Database update failed: {e}')
+    finally:
+        set_maintenance_mode(False)
+
+    return redirect('finder:index')
+
 
 TIER_LABELS = ['Core', 'Strong', 'Moderate', 'Minor', 'Fringe']
 NUM_TIERS = len(TIER_LABELS)

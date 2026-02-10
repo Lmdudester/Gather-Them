@@ -1,0 +1,38 @@
+{% extends "finder/base.html" %}
+{% block title %}Updating Database{% endblock %}
+
+{% block content %}
+<div class="container maintenance-container">
+    <div class="maintenance-card">
+        <div class="maintenance-icon">
+            <div class="maintenance-spinner"></div>
+        </div>
+        <h1>Updating Card Database</h1>
+        <p class="maintenance-detail">Downloading the latest data from MTGJSON. This may take a minute depending on your connection.</p>
+        <div class="maintenance-progress">
+            <div class="maintenance-progress-bar"></div>
+        </div>
+        <p class="maintenance-status" id="maintenance-status">Checking status<span class="maintenance-dots"></span></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var statusEl = document.getElementById('maintenance-status');
+    var checkCount = 0;
+
+    setInterval(function() {
+        checkCount++;
+        fetch('/', {method: 'HEAD'}).then(function(resp) {
+            if (resp.status !== 503) {
+                statusEl.textContent = 'Update complete! Redirecting\u2026';
+                statusEl.classList.add('maintenance-status-done');
+                setTimeout(function() { window.location.href = '/'; }, 500);
+            }
+        }).catch(function() {});
+    }, 5000);
+})();
+</script>
+{% endblock %}

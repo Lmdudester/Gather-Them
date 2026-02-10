@@ -20,6 +20,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Deck card exclusion** — cards already in your decklist are filtered out of results
 - **Multi-set search** — select multiple target sets via a searchable picker
 - **272 playable sets** sorted by release date
+- **One-click database update** — download the latest MTGJSON data from within the app, with a maintenance page shown during the update
 
 ## Requirements
 
@@ -30,11 +31,13 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 
 ## Setup
 
-1. Download the AllPrintings SQLite database from [mtgjson.com/downloads/all-files](https://mtgjson.com/downloads/all-files/) and place it somewhere accessible.
+1. Download the AllPrintings SQLite database from [mtgjson.com/downloads/all-files](https://mtgjson.com/downloads/all-files/) and place it somewhere accessible. (You can also use the in-app "Update Database" button after setup.)
 
-2. Create a `.env` file in the project root with your database path:
+2. Create a `.env` file in the project root:
    ```
    MTGJSON_DB_PATH=/path/to/AllPrintings.sqlite
+   PORT=8000  # optional, defaults to Django's 8000
+   # MTGJSON_DOWNLOAD_URL=https://mtgjson.com/api/v5/AllPrintings.sqlite.zip  # optional override
    ```
 
 3. Run the development server:
@@ -51,6 +54,7 @@ gather_them/          Django project settings and URL config
 finder/
   services/
     card_lookup.py    SQLite queries (card lookup, set listing, set card retrieval)
+    db_updater.py     MTGJSON database download and atomic replacement
     deck_parser.py    Decklist text parsing
     theme_extractor.py  Theme extraction and frequency ranking
     oracle_patterns.py  92 regex patterns for oracle text theme detection
@@ -59,8 +63,9 @@ finder/
     card_extras.py    Scryfall image URL template filter
   templates/finder/   Server-rendered HTML templates
   static/finder/css/  Dark theme responsive CSS
+  middleware.py       Maintenance mode middleware for database updates
   forms.py            Decklist form with set and format dropdowns
-  views.py            Three views: index, analyze, results
+  views.py            Views: index, analyze, results, update_db
 ```
 
 ## Data Sources

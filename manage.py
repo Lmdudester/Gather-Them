@@ -3,10 +3,21 @@
 import os
 import sys
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gather_them.settings')
+
+    # Allow PORT to be configured via .env for `runserver`
+    if len(sys.argv) == 2 and sys.argv[1] == 'runserver':
+        port = os.environ.get('PORT')
+        if port:
+            sys.argv.append(port)
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
