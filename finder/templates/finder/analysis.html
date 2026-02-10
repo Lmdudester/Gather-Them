@@ -8,7 +8,9 @@
     <div class="stats-bar">
         <span class="stat">Found <strong>{{ total_found }}/{{ total_in_list }}</strong> cards</span>
         <div class="stat-criteria">
-            <span class="stat-chip">{{ set_display }}</span>
+            {% for sd in set_displays %}
+            <span class="stat-chip">{{ sd }}</span>
+            {% endfor %}
             <span class="stat-chip">{{ format_display }}</span>
             {% if color_identity %}
             <span class="stat-chip">
@@ -35,11 +37,12 @@
 
     <form method="post" action="{% url 'finder:results' %}" class="theme-form">
         {% csrf_token %}
-        <input type="hidden" name="set_code" value="{{ set_code }}">
+        <input type="hidden" name="set_codes" value="{{ set_codes_json }}">
         <input type="hidden" name="format_name" value="{{ format_name }}">
         <input type="hidden" name="color_identity" value="{{ color_identity_json }}">
+        <input type="hidden" name="deck_card_names" value="{{ deck_card_names_json }}">
 
-        <p class="instructions">Select themes to find matching cards in {{ set_display }}:</p>
+        <p class="instructions">Select themes to find matching cards in {% for sd in set_displays %}{{ sd }}{% if not forloop.last %}, {% endif %}{% endfor %}:</p>
 
         <div class="select-controls">
             <button type="button" class="btn btn-small" onclick="toggleAll(true)">Select All</button>

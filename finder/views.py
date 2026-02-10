@@ -86,7 +86,7 @@ def analyze(request):
         return render(request, 'finder/index.html', {'form': form})
 
     decklist_text = form.cleaned_data['decklist']
-    set_code = form.cleaned_data['set_code']
+    set_codes = form.cleaned_data['set_code']  # now a list
     format_name = form.cleaned_data['format_name']
 
     # Parse the decklist
@@ -113,14 +113,10 @@ def analyze(request):
     total_in_list = len(entries)
     total_found = len(found_cards)
 
-    # Get the set name for display
+    # Get set display names
     from .services.card_lookup import get_sets_for_dropdown
-    sets_list = get_sets_for_dropdown()
-    set_display = set_code.upper()
-    for code, display in sets_list:
-        if code == set_code:
-            set_display = display
-            break
+    sets_lookup = dict(get_sets_for_dropdown())
+    set_displays = [sets_lookup.get(code, code.upper()) for code in set_codes]
 
     # Get format display name
     from .forms import FORMAT_CHOICES
@@ -135,14 +131,17 @@ def analyze(request):
     for category, theme_list in themes.items():
         tiered_themes[category] = _tier_themes(theme_list)
 
+    deck_card_names = [card['name'] for card in found_cards.values()]
+
     context = {
         'tiered_themes': tiered_themes,
-        'set_code': set_code,
-        'set_display': set_display,
+        'set_codes_json': json.dumps(set_codes),
+        'set_displays': set_displays,
         'format_name': format_name,
         'format_display': format_display,
         'color_identity': color_identity,
         'color_identity_json': json.dumps(color_identity),
+        'deck_card_names_json': json.dumps(deck_card_names),
         'total_in_list': total_in_list,
         'total_found': total_found,
         'unfound_names': unfound_names,
@@ -156,24 +155,35 @@ def results(request):
         return render(request, 'finder/index.html', {'form': DecklistForm()})
 
     selected_tags = request.POST.getlist('tags')
-    set_code = request.POST.get('set_code', '')
+    set_codes_json = request.POST.get('set_codes', '[]')
     format_name = request.POST.get('format_name', '')
     color_identity_json = request.POST.get('color_identity', '[]')
+    deck_card_names_json = request.POST.get('deck_card_names', '[]')
+
+    try:
+        set_codes = json.loads(set_codes_json)
+    except (json.JSONDecodeError, TypeError):
+        set_codes = []
 
     try:
         color_identity = json.loads(color_identity_json)
     except (json.JSONDecodeError, TypeError):
         color_identity = []
 
-    if not selected_tags or not set_code:
+    try:
+        deck_card_names = set(json.loads(deck_card_names_json))
+    except (json.JSONDecodeError, TypeError):
+        deck_card_names = set()
+
+    if not selected_tags or not set_codes:
         return render(request, 'finder/index.html', {
             'form': DecklistForm(),
             'error': 'Please select at least one theme tag.',
         })
 
-    # Get cards from target set with format + color filtering
+    # Get cards from target sets with format + color filtering
     set_cards = get_set_cards(
-        set_code,
+        set_codes,
         format_name=format_name or None,
         deck_color_identity=color_identity if color_identity else None,
     )
@@ -186,6 +196,13 @@ def results(request):
         (card, tags, count) for card, tags, count in matched_results
         if 'Basic' not in card.get('supertypes', [])
     ]
+
+    # Exclude cards already in the user's deck
+    if deck_card_names:
+        matched_results = [
+            (card, tags, count) for card, tags, count in matched_results
+            if card.get('name') not in deck_card_names
+        ]
 
     # Pre-compute filter data attributes on each card and collect distinct values
     rarity_order = ['common', 'uncommon', 'rare', 'mythic']
@@ -212,14 +229,10 @@ def results(request):
     filter_mvs = sorted(filter_mv_set, key=lambda x: (x == '7+', int(x.rstrip('+'))))
     filter_tags = sorted(filter_tags_set)
 
-    # Get set display name
+    # Get set display names
     from .services.card_lookup import get_sets_for_dropdown
-    sets_list = get_sets_for_dropdown()
-    set_display = set_code.upper()
-    for code, display in sets_list:
-        if code == set_code:
-            set_display = display
-            break
+    sets_lookup = dict(get_sets_for_dropdown())
+    set_displays = [sets_lookup.get(code, code.upper()) for code in set_codes]
 
     # Format display
     from .forms import FORMAT_CHOICES
@@ -232,8 +245,8 @@ def results(request):
     context = {
         'results': matched_results,
         'selected_tags': selected_tags,
-        'set_code': set_code,
-        'set_display': set_display,
+        'set_codes_json': json.dumps(set_codes),
+        'set_displays': set_displays,
         'format_name': format_name,
         'format_display': format_display,
         'color_identity': color_identity,

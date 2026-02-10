@@ -216,6 +216,102 @@ textarea:focus, select:focus {
     background: rgba(233, 69, 96, 0.08);
 }
 
+/* === Set Picker === */
+.set-select-hidden {
+    display: none;
+}
+
+.set-picker {
+    position: relative;
+}
+
+.set-search {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.set-search:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+}
+
+.set-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    z-index: 100;
+}
+
+.set-dropdown.open {
+    display: block;
+}
+
+.set-dropdown-item {
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition: background 0.15s;
+}
+
+.set-dropdown-item:hover {
+    background: rgba(233, 69, 96, 0.12);
+    color: var(--accent-hover);
+}
+
+.set-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+}
+
+.set-chips:empty {
+    margin-top: 0;
+}
+
+.set-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.set-chip-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 0.15rem;
+    transition: color 0.15s;
+}
+
+.set-chip-remove:hover {
+    color: var(--accent);
+}
+
 /* === Stats Bar === */
 .stats-bar {
     display: flex;

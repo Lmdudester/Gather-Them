@@ -172,11 +172,11 @@ def _aggregate_multi_face(cards_by_name):
     return result
 
 
-def get_set_cards(set_code, format_name=None, deck_color_identity=None):
-    """Get all cards from a specific set, with optional format/color filtering.
+def get_set_cards(set_codes, format_name=None, deck_color_identity=None):
+    """Get all cards from one or more sets, with optional format/color filtering.
 
     Args:
-        set_code: The set code (e.g., 'MKM')
+        set_codes: A set code string or list of set codes (e.g., ['MKM', 'MKC'])
         format_name: Format column name for legality filtering (e.g., 'commander')
         deck_color_identity: List of colors (e.g., ['R', 'W']) for color identity filtering.
                            Only cards whose colorIdentity is a subset will be included.
@@ -184,17 +184,20 @@ def get_set_cards(set_code, format_name=None, deck_color_identity=None):
     Returns:
         List of card dicts with parsed JSON fields and scryfallId.
     """
+    if isinstance(set_codes, str):
+        set_codes = [set_codes]
+
     query = """
         SELECT c.*, ci.scryfallId
         FROM cards c
         LEFT JOIN cardIdentifiers ci ON c.uuid = ci.uuid
     """
-    params = []
+    placeholders = ','.join('?' for _ in set_codes)
+    params = list(set_codes)
     conditions = [
-        "c.setCode = ?",
+        f"c.setCode IN ({placeholders})",
         "c.language = 'English'",
     ]
-    params.append(set_code)
 
     # Format legality filter
     if format_name:

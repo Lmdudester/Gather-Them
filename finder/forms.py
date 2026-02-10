@@ -35,8 +35,9 @@ class DecklistForm(forms.Form):
         }),
         label='Decklist',
     )
-    set_code = forms.ChoiceField(
-        label='Target Set',
+    set_code = forms.MultipleChoiceField(
+        label='Target Sets',
+        widget=forms.SelectMultiple(attrs={'class': 'set-select-hidden'}),
     )
     format_name = forms.ChoiceField(
         choices=FORMAT_CHOICES,

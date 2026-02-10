@@ -13,8 +13,12 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,10 +49,7 @@ INSTALLED_APPS = [
 ]
 
 # MTGJSON Database Path
-MTGJSON_DB_PATH = os.environ.get(
-    'MTGJSON_DB_PATH',
-    'C:/Databases/MTG-Gather-Them/AllPrintings.sqlite',
-)
+MTGJSON_DB_PATH = os.environ.get('MTGJSON_DB_PATH')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -24,8 +24,21 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="{{ form.set_code.id_for_label }}">{{ form.set_code.label }}</label>
+                <label>{{ form.set_code.label }}</label>
+                <div class="set-picker">
+                    <input type="text" class="set-search" placeholder="Search sets..." autocomplete="off">
+                    <div class="set-dropdown"></div>
+                </div>
+                <div class="set-chips"></div>
                 {{ form.set_code }}
+                <p class="field-hint">Type to search, click to add.</p>
+                {% if form.set_code.errors %}
+                <div class="field-errors">
+                    {% for error in form.set_code.errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
@@ -37,4 +50,102 @@
         <button type="submit" class="btn btn-primary">Analyze Deck</button>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const hiddenSelect = document.getElementById('id_set_code');
+    const searchInput = document.querySelector('.set-search');
+    const dropdown = document.querySelector('.set-dropdown');
+    const chipsContainer = document.querySelector('.set-chips');
+
+    // Build list of all sets from the hidden <select>
+    const allSets = Array.from(hiddenSelect.options).map(opt => ({
+        value: opt.value,
+        label: opt.textContent,
+    }));
+
+    function getSelectedValues() {
+        return new Set(Array.from(hiddenSelect.selectedOptions).map(o => o.value));
+    }
+
+    const RECENT_COUNT = 15;
+
+    function renderDropdown(filter) {
+        const selected = getSelectedValues();
+        const query = filter.toLowerCase();
+        const available = allSets.filter(s => !selected.has(s.value));
+        const matches = query === ''
+            ? available.slice(0, RECENT_COUNT)
+            : available.filter(s => s.label.toLowerCase().includes(query)).slice(0, 50);
+        if (matches.length === 0) {
+            dropdown.classList.remove('open');
+            dropdown.innerHTML = '';
+            return;
+        }
+        dropdown.innerHTML = matches.map(s =>
+            `<div class="set-dropdown-item" data-value="${s.value}">${s.label}</div>`
+        ).join('');
+        dropdown.classList.add('open');
+    }
+
+    function renderChips() {
+        const selected = getSelectedValues();
+        chipsContainer.innerHTML = '';
+        allSets.filter(s => selected.has(s.value)).forEach(s => {
+            const chip = document.createElement('span');
+            chip.className = 'set-chip';
+            chip.innerHTML = `${s.label} <button type="button" class="set-chip-remove" data-value="${s.value}">&times;</button>`;
+            chipsContainer.appendChild(chip);
+        });
+    }
+
+    function selectSet(value) {
+        const opt = hiddenSelect.querySelector(`option[value="${value}"]`);
+        if (opt) opt.selected = true;
+        searchInput.value = '';
+        dropdown.classList.remove('open');
+        dropdown.innerHTML = '';
+        renderChips();
+    }
+
+    function deselectSet(value) {
+        const opt = hiddenSelect.querySelector(`option[value="${value}"]`);
+        if (opt) opt.selected = false;
+        renderChips();
+    }
+
+    searchInput.addEventListener('input', () => renderDropdown(searchInput.value));
+    searchInput.addEventListener('focus', () => renderDropdown(searchInput.value));
+
+    dropdown.addEventListener('click', e => {
+        const item = e.target.closest('.set-dropdown-item');
+        if (item) selectSet(item.dataset.value);
+    });
+
+    chipsContainer.addEventListener('click', e => {
+        const btn = e.target.closest('.set-chip-remove');
+        if (btn) deselectSet(btn.dataset.value);
+    });
+
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.set-picker')) {
+            dropdown.classList.remove('open');
+            dropdown.innerHTML = '';
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            dropdown.classList.remove('open');
+            dropdown.innerHTML = '';
+            searchInput.blur();
+        }
+    });
+
+    // Render chips for any pre-selected values (e.g. form re-render after validation error)
+    renderChips();
+})();
+</script>
 {% endblock %}
