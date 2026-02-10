@@ -7,20 +7,19 @@
 
     <div class="stats-bar">
         <span class="stat">Found <strong>{{ total_found }}/{{ total_in_list }}</strong> cards</span>
-        <span class="stat">Target set: <strong>{{ set_display }}</strong></span>
-        <span class="stat">Format: <strong>{{ format_display }}</strong></span>
-        {% if color_identity %}
-        <span class="stat">
-            Color identity:
-            <strong>
+        <div class="stat-criteria">
+            <span class="stat-chip">{{ set_display }}</span>
+            <span class="stat-chip">{{ format_display }}</span>
+            {% if color_identity %}
+            <span class="stat-chip">
                 {% for c in color_identity %}
                 <span class="mana mana-{{ c }}">{{ c }}</span>
                 {% endfor %}
-            </strong>
-        </span>
-        {% else %}
-        <span class="stat">Color identity: <strong>Colorless</strong></span>
-        {% endif %}
+            </span>
+            {% else %}
+            <span class="stat-chip">Colorless</span>
+            {% endif %}
+        </div>
     </div>
 
     {% if unfound_names %}

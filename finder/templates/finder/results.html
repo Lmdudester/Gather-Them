@@ -7,17 +7,18 @@
     <h1>Matching Cards</h1>
 
     <div class="stats-bar">
-        <span class="stat"><strong>{{ total_matched }}</strong> cards match your themes</span>
-        <span class="stat">from <strong>{{ set_display }}</strong></span>
-        <span class="stat">Format: <strong>{{ format_display }}</strong></span>
-        {% if color_identity %}
-        <span class="stat">
-            Colors:
-            {% for c in color_identity %}
-            <span class="mana mana-{{ c }}">{{ c }}</span>
-            {% endfor %}
-        </span>
-        {% endif %}
+        <span class="stat"><strong>{{ total_matched }}</strong> cards match your themes:</span>
+        <div class="stat-criteria">
+            <span class="stat-chip">{{ set_display }}</span>
+            <span class="stat-chip">{{ format_display }}</span>
+            {% if color_identity %}
+            <span class="stat-chip">
+                {% for c in color_identity %}
+                <span class="mana mana-{{ c }}">{{ c }}</span>
+                {% endfor %}
+            </span>
+            {% endif %}
+        </div>
     </div>
 
     <details class="selected-tags-summary">
@@ -30,9 +31,71 @@
     </details>
 
     {% if results %}
+    <details class="filter-bar">
+        <summary class="filter-bar-header">
+            <span class="filter-label">Filters</span>
+            <span class="filter-count"><span id="visible-count">{{ total_matched }}</span> / {{ total_matched }}</span>
+            <span class="filter-active-summary" id="filter-active-summary"></span>
+            <button type="button" class="btn btn-small" id="clear-filters">Clear</button>
+        </summary>
+
+        <div class="filter-bar-body">
+            {% if filter_types %}
+            <div class="filter-section">
+                <span class="filter-section-label">Type</span>
+                <div class="filter-options">
+                    {% for t in filter_types %}
+                    <button type="button" class="filter-btn" data-category="types" data-value="{{ t }}">{{ t }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if filter_rarities %}
+            <div class="filter-section">
+                <span class="filter-section-label">Rarity</span>
+                <div class="filter-options">
+                    {% for r in filter_rarities %}
+                    <button type="button" class="filter-btn" data-category="rarity" data-value="{{ r }}">{{ r|title }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if filter_mvs %}
+            <div class="filter-section">
+                <span class="filter-section-label">Mana Value</span>
+                <div class="filter-options">
+                    {% for mv in filter_mvs %}
+                    <button type="button" class="filter-btn" data-category="mv" data-value="{{ mv }}">{{ mv }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if filter_tags %}
+            <div class="filter-section">
+                <span class="filter-section-label">Matched Tags</span>
+                <div class="filter-options">
+                    {% for tag in filter_tags %}
+                    <button type="button" class="filter-btn" data-category="tags" data-value="{{ tag }}">{{ tag }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </details>
+
     <div class="card-grid">
         {% for card, matched_tags, match_count in results %}
-        <div class="card-item">
+        <a class="card-item"
+           href="{{ card|scryfall_page_url }}"
+           target="_blank"
+           rel="noopener"
+           data-types="{{ card.types|join:',' }}"
+           data-rarity="{{ card.rarity|default:''|lower }}"
+           data-mv="{{ card.mv_display }}"
+           data-tags="{{ matched_tags|join:',' }}">
             <div class="card-image-wrapper">
                 <img
                     src="{{ card.scryfallId|scryfall_image_url }}"
@@ -50,7 +113,7 @@
                     {% endfor %}
                 </div>
             </div>
-        </div>
+        </a>
         {% endfor %}
     </div>
     {% else %}
@@ -64,4 +127,103 @@
         <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const clearBtn = document.getElementById('clear-filters');
+    const visibleCount = document.getElementById('visible-count');
+    const activeSummary = document.getElementById('filter-active-summary');
+    const cardItems = document.querySelectorAll('.card-item');
+
+    if (!filterBtns.length) return;
+
+    // Prevent Clear button from toggling the details open/close
+    clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        filterBtns.forEach(btn => btn.classList.remove('active'));
+        for (const key in activeFilters) {
+            delete activeFilters[key];
+        }
+        filterCards();
+    });
+
+    // Track active filters per category
+    const activeFilters = {};
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const category = btn.dataset.category;
+            const value = btn.dataset.value;
+
+            if (!activeFilters[category]) {
+                activeFilters[category] = new Set();
+            }
+
+            if (activeFilters[category].has(value)) {
+                activeFilters[category].delete(value);
+                btn.classList.remove('active');
+            } else {
+                activeFilters[category].add(value);
+                btn.classList.add('active');
+            }
+
+            // Clean up empty categories
+            if (activeFilters[category].size === 0) {
+                delete activeFilters[category];
+            }
+
+            filterCards();
+        });
+    });
+
+    function updateActiveSummary() {
+        const labels = [];
+        for (const [category, values] of Object.entries(activeFilters)) {
+            if (values.size === 0) continue;
+            labels.push(...values);
+        }
+        activeSummary.textContent = labels.length ? labels.join(', ') : '';
+    }
+
+    function filterCards() {
+        let visible = 0;
+
+        cardItems.forEach(item => {
+            let show = true;
+
+            for (const [category, values] of Object.entries(activeFilters)) {
+                if (values.size === 0) continue;
+
+                let categoryMatch = false;
+
+                if (category === 'types') {
+                    const itemTypes = item.dataset.types.split(',').filter(Boolean);
+                    categoryMatch = itemTypes.some(t => values.has(t));
+                } else if (category === 'rarity') {
+                    categoryMatch = values.has(item.dataset.rarity);
+                } else if (category === 'mv') {
+                    categoryMatch = values.has(item.dataset.mv);
+                } else if (category === 'tags') {
+                    const itemTags = item.dataset.tags.split(',').filter(Boolean);
+                    categoryMatch = itemTags.some(t => values.has(t));
+                }
+
+                if (!categoryMatch) {
+                    show = false;
+                    break;
+                }
+            }
+
+            item.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        visibleCount.textContent = visible;
+        updateActiveSummary();
+    }
+})();
+</script>
 {% endblock %}

@@ -12,6 +12,7 @@
         <div class="form-group">
             <label for="{{ form.decklist.id_for_label }}">{{ form.decklist.label }}</label>
             {{ form.decklist }}
+            <p class="field-hint">From Moxfield: <strong>More</strong> &rarr; <strong>Export</strong> &rarr; <strong>Copy Plain Text</strong></p>
             {% if form.decklist.errors %}
             <div class="field-errors">
                 {% for error in form.decklist.errors %}

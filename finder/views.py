@@ -181,6 +181,37 @@ def results(request):
     # Filter by selected tags
     matched_results = filter_cards_by_tags(set_cards, selected_tags)
 
+    # Exclude basic lands
+    matched_results = [
+        (card, tags, count) for card, tags, count in matched_results
+        if 'Basic' not in card.get('supertypes', [])
+    ]
+
+    # Pre-compute filter data attributes on each card and collect distinct values
+    rarity_order = ['common', 'uncommon', 'rare', 'mythic']
+    filter_types_set = set()
+    filter_rarities_set = set()
+    filter_mv_set = set()
+    filter_tags_set = set()
+    for card, matched_tags, _ in matched_results:
+        for t in card.get('types', []):
+            filter_types_set.add(t)
+        rarity = (card.get('rarity') or '').lower()
+        if rarity:
+            filter_rarities_set.add(rarity)
+        mv_raw = int(float(card.get('manaValue') or 0))
+        mv_display = '7+' if mv_raw >= 7 else str(mv_raw)
+        card['mv_display'] = mv_display
+        filter_mv_set.add(mv_display)
+        for tag in matched_tags:
+            filter_tags_set.add(tag)
+
+    filter_types = sorted(filter_types_set)
+    filter_rarities = [r for r in rarity_order if r in filter_rarities_set]
+    # Sort MV values: numeric first, then 7+
+    filter_mvs = sorted(filter_mv_set, key=lambda x: (x == '7+', int(x.rstrip('+'))))
+    filter_tags = sorted(filter_tags_set)
+
     # Get set display name
     from .services.card_lookup import get_sets_for_dropdown
     sets_list = get_sets_for_dropdown()
@@ -208,5 +239,9 @@ def results(request):
         'color_identity': color_identity,
         'total_set_cards': len(set_cards),
         'total_matched': len(matched_results),
+        'filter_types': filter_types,
+        'filter_rarities': filter_rarities,
+        'filter_mvs': filter_mvs,
+        'filter_tags': filter_tags,
     }
     return render(request, 'finder/results.html', context)
