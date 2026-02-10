@@ -1,0 +1,24 @@
+# Auto-updating Gather Them Docker deployment
+# Copy this file to docker-compose.autoupdate.yml and update the paths below
+
+services:
+  gather-them:
+    build:
+      context: .
+      dockerfile: Dockerfile.autoupdate
+    container_name: gather-them
+    ports:
+      - "3007:3007"
+    volumes:
+      # MTGJSON database directory - update this to your local path
+      - /path/to/your/mtgjson-data:/mtgjson-data
+    environment:
+      - MTGJSON_DB_PATH=/mtgjson-data/AllPrintings.sqlite
+      - DEBUG=True
+      - PORT=3007
+      - ALLOWED_HOSTS=*
+      # - GIT_BRANCH=main
+      # - GIT_REPO_URL=https://github.com/Lmdudester/Gather-Them.git
+      # - SECRET_KEY=your-secret-key-here
+      # - ALLOWED_HOSTS=localhost,127.0.0.1
+    restart: unless-stopped

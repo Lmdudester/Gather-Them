@@ -47,6 +47,45 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 
 4. Open http://localhost:8000/
 
+## Docker Deployment
+
+The app can be hosted in a Docker container with automatic updates — every container restart pulls the latest code from GitHub.
+
+### Quick Start
+
+1. Copy the example compose file and set your MTGJSON database path:
+   ```
+   cp docker-compose.autoupdate.example.yml docker-compose.autoupdate.yml
+   ```
+   Edit `docker-compose.autoupdate.yml` and update the volume path to your local MTGJSON database directory.
+
+2. Build and start:
+   ```
+   docker compose -f docker-compose.autoupdate.yml build
+   docker compose -f docker-compose.autoupdate.yml up -d
+   ```
+
+3. Open http://localhost:3007/
+
+### Updating
+
+Restart the container to pull the latest code:
+```
+docker restart gather-them
+```
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `MTGJSON_DB_PATH` | `/mtgjson-data/AllPrintings.sqlite` | Path to MTGJSON database inside the container |
+| `DEBUG` | `True` | Django debug mode |
+| `PORT` | `3007` | Server port |
+| `GIT_BRANCH` | `main` | Git branch to clone |
+| `GIT_REPO_URL` | `https://github.com/Lmdudester/Gather-Them.git` | Repository URL |
+| `SECRET_KEY` | (insecure default) | Django secret key |
+| `ALLOWED_HOSTS` | (empty) | Comma-separated allowed hosts (use `*` to allow all, e.g. for Tailscale access) |
+
 ## Project Structure
 
 ```

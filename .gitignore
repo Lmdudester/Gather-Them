@@ -16,3 +16,6 @@ db.sqlite3
 
 # Claude Code
 .claude/
+
+# Docker (personal compose with local paths)
+docker-compose.autoupdate.yml
