@@ -1,6 +1,6 @@
 # Gather Them
 
-A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks. Paste a decklist, select a target set, and find cards that match your deck's themes.
+A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks. Paste a decklist, select one or more target sets, and find cards that match your deck's themes.
 
 ## How It Works
 
@@ -8,7 +8,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 
 1. **Paste your decklist** — supports common formats (`1 Card Name`, `1x Card Name`), section headers (Commander, Sideboard, etc.), and 100-card singleton decks
 2. **Review extracted themes** — the app analyzes your deck and extracts themes across four categories (subtypes, keywords, card types, oracle text patterns), organized into tiers by frequency
-3. **Browse matching cards** — see cards from the target set that match your selected themes, filtered by format legality and color identity, with Scryfall card images
+3. **Browse matching cards** — see cards from the target sets that match your selected themes, filtered by format legality and color identity, with Scryfall card images. Cards already in your deck are automatically excluded.
 
 ## Features
 
@@ -17,21 +17,24 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
 - **3-step card name lookup** — exact name, then front face name (for DFCs/adventures like Bonecrusher Giant), then prefix match
-- **272 playable sets** in the dropdown, sorted by release date
+- **Deck card exclusion** — cards already in your decklist are filtered out of results
+- **Multi-set search** — select multiple target sets via a searchable picker
+- **272 playable sets** sorted by release date
 
 ## Requirements
 
 - Python 3.12+
 - Django 5.2+
+- python-dotenv 1.0+
 - MTGJSON AllPrintings SQLite database
 
 ## Setup
 
 1. Download the AllPrintings SQLite database from [mtgjson.com/downloads/all-files](https://mtgjson.com/downloads/all-files/) and place it somewhere accessible.
 
-2. Update `MTGJSON_DB_PATH` in `gather_them/settings.py` to point to your database file:
-   ```python
-   MTGJSON_DB_PATH = '/path/to/AllPrintings.sqlite'
+2. Create a `.env` file in the project root with your database path:
+   ```
+   MTGJSON_DB_PATH=/path/to/AllPrintings.sqlite
    ```
 
 3. Run the development server:
