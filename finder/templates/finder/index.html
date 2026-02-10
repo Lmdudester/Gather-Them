@@ -53,10 +53,15 @@
     <div class="db-management">
         <h2>Database Management</h2>
         <p class="subtitle">Download the latest card data from MTGJSON. The site will be unavailable during the update.</p>
-        <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-secondary">Update Database</button>
-        </form>
+        <div class="db-management-row">
+            <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Update Database</button>
+            </form>
+            {% if db_updated %}
+            <span class="db-updated">Last updated: {{ db_updated|date:"N j, Y" }} at {{ db_updated|time:"g:i A" }}</span>
+            {% endif %}
+        </div>
     </div>
 </div>
 {% endblock %}

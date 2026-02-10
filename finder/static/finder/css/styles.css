@@ -765,6 +765,17 @@ a.card-item {
     margin-bottom: 1rem;
 }
 
+.db-management-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.db-updated {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
 /* === Maintenance Page === */
 .maintenance-container {
     display: flex;
