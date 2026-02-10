@@ -1,0 +1,67 @@
+{% extends "finder/base.html" %}
+{% load card_extras %}
+{% block title %}Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Matching Cards</h1>
+
+    <div class="stats-bar">
+        <span class="stat"><strong>{{ total_matched }}</strong> cards match your themes</span>
+        <span class="stat">from <strong>{{ set_display }}</strong></span>
+        <span class="stat">Format: <strong>{{ format_display }}</strong></span>
+        {% if color_identity %}
+        <span class="stat">
+            Colors:
+            {% for c in color_identity %}
+            <span class="mana mana-{{ c }}">{{ c }}</span>
+            {% endfor %}
+        </span>
+        {% endif %}
+    </div>
+
+    <details class="selected-tags-summary">
+        <summary>{{ selected_tags|length }} theme{{ selected_tags|length|pluralize }} selected</summary>
+        <div class="tag-list">
+            {% for tag in selected_tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+    </details>
+
+    {% if results %}
+    <div class="card-grid">
+        {% for card, matched_tags, match_count in results %}
+        <div class="card-item">
+            <div class="card-image-wrapper">
+                <img
+                    src="{{ card.scryfallId|scryfall_image_url }}"
+                    alt="{{ card.name }}"
+                    loading="lazy"
+                    width="244"
+                    height="340"
+                >
+            </div>
+            <div class="card-info">
+                <span class="card-name">{{ card.name }}</span>
+                <div class="card-matched-tags">
+                    {% for tag in matched_tags %}
+                    <span class="tag tag-small">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-results">
+        <p>No cards in {{ set_display }} match your selected themes.</p>
+        <p>Try selecting different themes or a different set.</p>
+    </div>
+    {% endif %}
+
+    <div class="actions">
+        <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "finder/base.html" %}
+{% block title %}Deck Analysis{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Deck Analysis</h1>
+
+    <div class="stats-bar">
+        <span class="stat">Found <strong>{{ total_found }}/{{ total_in_list }}</strong> cards</span>
+        <span class="stat">Target set: <strong>{{ set_display }}</strong></span>
+        <span class="stat">Format: <strong>{{ format_display }}</strong></span>
+        {% if color_identity %}
+        <span class="stat">
+            Color identity:
+            <strong>
+                {% for c in color_identity %}
+                <span class="mana mana-{{ c }}">{{ c }}</span>
+                {% endfor %}
+            </strong>
+        </span>
+        {% else %}
+        <span class="stat">Color identity: <strong>Colorless</strong></span>
+        {% endif %}
+    </div>
+
+    {% if unfound_names %}
+    <details class="unfound-cards">
+        <summary>{{ unfound_names|length }} card{{ unfound_names|length|pluralize }} not found</summary>
+        <ul>
+            {% for name in unfound_names %}
+            <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    </details>
+    {% endif %}
+
+    <form method="post" action="{% url 'finder:results' %}" class="theme-form">
+        {% csrf_token %}
+        <input type="hidden" name="set_code" value="{{ set_code }}">
+        <input type="hidden" name="format_name" value="{{ format_name }}">
+        <input type="hidden" name="color_identity" value="{{ color_identity_json }}">
+
+        <p class="instructions">Select themes to find matching cards in {{ set_display }}:</p>
+
+        <div class="select-controls">
+            <button type="button" class="btn btn-small" onclick="toggleAll(true)">Select All</button>
+            <button type="button" class="btn btn-small" onclick="toggleAll(false)">Deselect All</button>
+            <button type="submit" class="btn btn-primary">Find Matching Cards</button>
+        </div>
+
+        {% for category, tiers in tiered_themes.items %}
+        {% if tiers %}
+        <div class="theme-category">
+            <h2>{{ category }}s</h2>
+            <div class="tier-columns">
+                {% for label, tier_index, items in tiers %}
+                <div class="tier-column">
+                    <div class="tier-header tier-{{ tier_index }}">{{ label }}</div>
+                    {% for name, count in items %}
+                    <label class="theme-checkbox">
+                        <input type="checkbox" name="tags" value="{{ category }}:{{ name }}" {% if tier_index == 1 %}checked{% endif %}>
+                        <span class="theme-label">{{ name }}</span>
+                        <span class="theme-count">{{ count }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </form>
+</div>
+
+<script>
+function toggleAll(checked) {
+    document.querySelectorAll('.theme-checkbox input[type="checkbox"]').forEach(cb => {
+        cb.checked = checked;
+    });
+}
+</script>
+{% endblock %}

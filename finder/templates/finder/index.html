@@ -1,0 +1,39 @@
+{% extends "finder/base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Find Cards for Your Deck</h1>
+    <p class="subtitle">Paste your decklist, pick a set, and discover cards that match your deck's themes.</p>
+
+    <form method="post" action="{% url 'finder:analyze' %}" class="deck-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.decklist.id_for_label }}">{{ form.decklist.label }}</label>
+            {{ form.decklist }}
+            {% if form.decklist.errors %}
+            <div class="field-errors">
+                {% for error in form.decklist.errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.set_code.id_for_label }}">{{ form.set_code.label }}</label>
+                {{ form.set_code }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.format_name.id_for_label }}">{{ form.format_name.label }}</label>
+                {{ form.format_name }}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Analyze Deck</button>
+    </form>
+</div>
+{% endblock %}

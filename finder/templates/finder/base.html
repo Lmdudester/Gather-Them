@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gather Them{% endblock %} - MTG Card Finder</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'finder/css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'finder:index' %}" class="logo">Gather Them</a>
+            <span class="tagline">Find new cards for your decks</span>
+        </nav>
+    </header>
+
+    <main>
+        {% if error %}
+        <div class="alert alert-error">{{ error }}</div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Card data from <a href="https://mtgjson.com" target="_blank" rel="noopener">MTGJSON</a>. Card images from <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>.</p>
+    </footer>
+</body>
+</html>
