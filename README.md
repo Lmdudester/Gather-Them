@@ -12,7 +12,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 
 ## Features
 
-- **92 oracle text patterns** covering archetypes like tokens, sacrifice, blink, copy, ramp, aristocrats, spellslinger, landfall, and more
+- **161 oracle text patterns** covering archetypes like tokens, sacrifice, blink, copy, ramp, aristocrats, spellslinger, landfall, untap, enchantress, artifacts matter, wheels, pillowfort, and more
 - **14 format filters** — Commander, Standard, Modern, Pioneer, Legacy, Vintage, Pauper, Oathbreaker, and others
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
@@ -97,7 +97,7 @@ finder/
     db_updater.py     MTGJSON database download and atomic replacement
     deck_parser.py    Decklist text parsing
     theme_extractor.py  Theme extraction and frequency ranking
-    oracle_patterns.py  92 regex patterns for oracle text theme detection
+    oracle_patterns.py  161 regex patterns for oracle text theme detection
     set_filter.py     Filter set cards by selected theme tags
   templatetags/
     card_extras.py    Scryfall image URL template filter

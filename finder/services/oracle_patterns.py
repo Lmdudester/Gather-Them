@@ -13,6 +13,9 @@ ORACLE_PATTERNS = [
     (r'\+1/\+1 counter', '+1/+1 counters'),
     (r'-1/-1 counter', '-1/-1 counters'),
     (r'(charge|lore|loyalty|verse|time|age|fade)\s+counter', 'Special counters'),
+    (r'(oil|stun|shield|finality)\s+counter', 'Keyword counters'),
+    (r'double\s+the\s+number\s+of\s+.*?counter', 'Counter doubling'),
+    (r'enters\s+.*?with\s+.*?\+1/\+1\s+counter', 'Enters with counters'),
 
     # --- Tokens ---
     (r'create[s]?\s+.*?token', 'Create token'),
@@ -24,6 +27,10 @@ ORACLE_PATTERNS = [
     (r'(powerstone\s+token|create.*?Powerstone)', 'Powerstone tokens'),
     (r'(populate)', 'Populate'),
 
+    # --- Go wide / token payoffs ---
+    (r'for\s+each\s+(creature|token)\s+you\s+control', 'Go wide payoff'),
+    (r'token[s]?\s+you\s+control', 'Token count matters'),
+
     # --- Card draw & selection ---
     (r'draw[s]?\s+.*?card', 'Draw cards'),
     (r'scry\s+\d+', 'Scry'),
@@ -31,6 +38,8 @@ ORACLE_PATTERNS = [
     (r'(look at the top|reveal the top).*?(library)', 'Topdeck manipulation'),
     (r'exile[s]?\s+.*?top.*?(play|cast|until)', 'Impulse draw'),
     (r'(whenever|when).*?(draw|draws)\s+.*?card', 'Draw trigger'),
+    (r'(cycling|cycle\s+)', 'Cycling'),
+    (r'(prowess)', 'Prowess'),
 
     # --- Removal ---
     (r'destroy\s+(target|all|each)', 'Destroy'),
@@ -47,6 +56,9 @@ ORACLE_PATTERNS = [
     (r'(whenever|when)\s+.*?\s+dies', 'Death trigger'),
     (r'(each|all)\s+opponent[s]?\s+lose', 'Drain'),
     (r'(blood\s+artist|whenever.*?dies.*?lose)', 'Aristocrats'),
+    (r'whenever\s+you\s+sacrifice', 'Sacrifice trigger'),
+    (r'(exploit|devour|emerge)', 'Sacrifice mechanic'),
+    (r'(each\s+opponent|target\s+opponent)\s+sacrifices', 'Edict effect'),
 
     # --- Graveyard ---
     (r'(from|to|into|in)\s+(your|a|the)\s+graveyard', 'Graveyard'),
@@ -54,7 +66,8 @@ ORACLE_PATTERNS = [
     (r'(put|return)\s+.*?from\s+.*?graveyard\s+.*?(battlefield|onto the battlefield)', 'Reanimate'),
     (r'(exile|exiles)\s+.*?from\s+.*?graveyard', 'Graveyard hate'),
     (r'(mill|puts?\s+.*?cards?\s+.*?into\s+.*?graveyard)', 'Mill'),
-    (r'(dredge|delve|escape|unearth|flashback|retrace|embalm|eternalize)', 'Graveyard cast'),
+    (r'(dredge|delve|escape|unearth|flashback|retrace|embalm|eternalize|disturb|aftermath)', 'Graveyard cast'),
+    (r'(delirium|threshold)', 'Graveyard threshold'),
     (r'(cards?\s+in\s+your\s+graveyard|graveyard\s+count)', 'Graveyard payoff'),
 
     # --- Life ---
@@ -63,6 +76,7 @@ ORACLE_PATTERNS = [
     (r'(lose|loses)\s+\d+\s+life', 'Life loss'),
     (r'pay[s]?\s+\d+\s+life', 'Pay life'),
     (r'(life\s+total\s+becomes|exchange\s+life)', 'Life total manipulation'),
+    (r'(lifelink)', 'Lifelink'),
 
     # --- Combat ---
     (r'(whenever|when)\s+.*?\s+attacks', 'Attack trigger'),
@@ -73,6 +87,7 @@ ORACLE_PATTERNS = [
     (r'(whenever|when)\s+.*?\s+blocks', 'Block trigger'),
     (r'(goad|goaded)', 'Goad'),
     (r'(must\s+attack|attacks?\s+each\s+(combat|turn)\s+if\s+able)', 'Forced combat'),
+    (r'gain\s+control\s+of\s+target.*?until\s+end\s+of\s+turn', 'Threaten'),
 
     # --- Blink & bounce ---
     (r'exile[s]?\s+.*?return[s]?\s+.*?(battlefield|to the battlefield)', 'Blink'),
@@ -102,6 +117,12 @@ ORACLE_PATTERNS = [
     (r'(without\s+paying\s+.*?mana\s+cost|cast\s+.*?without\s+paying)', 'Free cast'),
     (r'(untap[s]?\s+(target|all|each)\s+land)', 'Land untap'),
 
+    # --- Untap ---
+    (r'untap[s]?\s+(target|another|a|an)\s+(creature|permanent)', 'Untap creature'),
+    (r'untap\s+(all|each)\s+(creature|permanent)', 'Mass untap'),
+    (r'untap\s+(it|that\s+creature|enchanted\s+creature)', 'Self-untap'),
+    (r'whenever.*untaps', 'Untap trigger'),
+
     # --- Tutor & library ---
     (r'(search|searches)\s+your\s+library', 'Tutor'),
     (r'(reveal|look\s+at)\s+cards?\s+from\s+the\s+top', 'Topdeck peek'),
@@ -124,6 +145,11 @@ ORACLE_PATTERNS = [
     (r'(reconfigure)', 'Reconfigure'),
     (r'(attach|attached\s+to)', 'Attachment'),
 
+    # --- Enchantress / constellation ---
+    (r'whenever\s+you\s+cast\s+an?\s+enchantment', 'Enchantress trigger'),
+    (r'(whenever\s+an?\s+enchantment\s+enters|constellation)', 'Constellation'),
+    (r'for\s+each\s+enchantment\s+you\s+control', 'Enchantment count'),
+
     # --- Tribal / type matters ---
     (r'(creatures?\s+you\s+control\s+get|other\s+creatures?\s+.*?\s+get)\s+\+', 'Anthem'),
     (r'(creatures?\s+of\s+the\s+chosen\s+type|choose\s+a\s+creature\s+type)', 'Tribal payoff'),
@@ -134,10 +160,18 @@ ORACLE_PATTERNS = [
     (r'(instant[s]?\s+and\s+sorcery|sorceries?\s+and\s+instants?)\s+(card|in\s+your\s+graveyard)', 'Spell graveyard'),
     (r'(magecraft)', 'Magecraft'),
 
+    # --- Artifacts matter ---
+    (r'whenever\s+.*?artifact\s+enters', 'Artifact ETB trigger'),
+    (r'for\s+each\s+artifact\s+you\s+control', 'Artifact count'),
+    (r'whenever\s+you\s+cast\s+an?\s+artifact', 'Artifact cast trigger'),
+    (r'(metalcraft|improvise)', 'Metalcraft/Improvise'),
+
     # --- Lands matter ---
     (r'(whenever\s+a\s+land\s+enters|landfall)', 'Landfall'),
     (r'(play\s+an?\s+additional\s+land|additional\s+land)', 'Extra land drop'),
     (r'(land[s]?\s+you\s+control|number\s+of\s+lands?\s+you\s+control)', 'Land count matters'),
+    (r'(sacrifice\s+a\s+land|sacrifices?\s+.*?land)', 'Land sacrifice'),
+    (r'(play\s+land[s]?\s+from\s+your\s+graveyard)', 'Crucible effect'),
 
     # --- Extra turns ---
     (r'(extra\s+turn|additional\s+turn)', 'Extra turns'),
@@ -159,6 +193,7 @@ ORACLE_PATTERNS = [
     (r'(transform|transforms|transformed)', 'Transform'),
     (r'(venture\s+into\s+the\s+dungeon|completed?\s+a\s+dungeon)', 'Dungeon'),
     (r'(infect|poison\s+counter|toxic)', 'Poison'),
+    (r'(corrupted)', 'Corrupted'),
     (r'(energy\s+counter|\{e\})', 'Energy'),
     (r'(experience\s+counter)', 'Experience'),
     (r'(partner|choose\s+a\s+background)', 'Partner'),
@@ -181,6 +216,19 @@ ORACLE_PATTERNS = [
     (r'(enrage)', 'Enrage'),
     (r'(incubat)', 'Incubate'),
     (r'(amass\s)', 'Amass'),
+
+    # --- Wheels ---
+    (r'discard[s]?\s+(your|their)\s+hand.*?draw', 'Wheel'),
+    (r'whenever.*?(draws?\s+a\s+card).*?(damage|lose)', 'Wheel punishment'),
+
+    # --- Pillowfort ---
+    (r'(can\'t\s+attack\s+you|attacks?\s+you.*?pay)', 'Pillowfort'),
+    (r'(cost[s]?\s+.*?more\s+to\s+cast|spells?\s+cost\s+.*?more)', 'Tax effect'),
+    (r'(can\'t\s+cast\s+more\s+than\s+one|only\s+cast\s+.*?each\s+turn)', 'Casting restriction'),
+
+    # --- Chaos / randomness ---
+    (r'(flip\s+a\s+coin|coin\s+flip)', 'Coin flip'),
+    (r'(roll\s+.*?d(4|6|8|10|12|20)|roll\s+a\s+.*?die)', 'Dice rolling'),
 ]
 
 # Build the reverse mapping (label -> regex) for set_filter.py
