@@ -46,6 +46,10 @@
         <div class="filter-bar-body">
             {% if filter_types %}
             <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="types">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
                 <span class="filter-section-label">Type</span>
                 <div class="filter-options">
                     {% for t in filter_types %}
@@ -57,6 +61,10 @@
 
             {% if filter_rarities %}
             <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="rarity">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
                 <span class="filter-section-label">Rarity</span>
                 <div class="filter-options">
                     {% for r in filter_rarities %}
@@ -68,6 +76,10 @@
 
             {% if filter_mvs %}
             <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="mv">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
                 <span class="filter-section-label">Mana Value</span>
                 <div class="filter-options">
                     {% for mv in filter_mvs %}
@@ -77,12 +89,23 @@
             </div>
             {% endif %}
 
-            {% if filter_tags %}
-            <div class="filter-section">
+            {% if filter_tags_grouped %}
+            <div class="filter-section filter-section-grouped">
+                <label class="filter-mode-toggle" data-category="tags">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
                 <span class="filter-section-label">Matched Tags</span>
-                <div class="filter-options">
-                    {% for tag in filter_tags %}
-                    <button type="button" class="filter-btn" data-category="tags" data-value="{{ tag }}">{{ tag }}</button>
+                <div class="filter-options filter-options-grouped">
+                    {% for category, tags in filter_tags_grouped %}
+                    <div class="filter-tag-group">
+                        <span class="filter-tag-group-label">{{ category }}</span>
+                        <div class="filter-tag-group-buttons">
+                            {% for tag in tags %}
+                            <button type="button" class="filter-btn" data-category="tags" data-value="{{ tag }}">{{ tag|tag_display }}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
@@ -113,7 +136,7 @@
                 <span class="card-name">{{ card.name }}</span>
                 <div class="card-matched-tags">
                     {% for tag in matched_tags %}
-                    <span class="tag tag-small">{{ tag }}</span>
+                    <span class="tag tag-small">{{ tag|tag_display }}</span>
                     {% endfor %}
                 </div>
             </div>
@@ -141,8 +164,28 @@
     const visibleCount = document.getElementById('visible-count');
     const activeSummary = document.getElementById('filter-active-summary');
     const cardItems = document.querySelectorAll('.card-item');
+    const modeToggles = document.querySelectorAll('.filter-mode-toggle');
 
     if (!filterBtns.length) return;
+
+    // Track active filters per category
+    const activeFilters = {};
+
+    // Track AND/OR mode per category (false = OR, true = AND)
+    const filterModes = {};
+
+    // Mode toggle listeners
+    modeToggles.forEach(toggle => {
+        const category = toggle.dataset.category;
+        const checkbox = toggle.querySelector('input');
+        const label = toggle.querySelector('.filter-mode-label');
+
+        checkbox.addEventListener('change', () => {
+            filterModes[category] = checkbox.checked;
+            label.textContent = checkbox.checked ? 'AND' : 'OR';
+            filterCards();
+        });
+    });
 
     // Prevent Clear button from toggling the details open/close
     clearBtn.addEventListener('click', (e) => {
@@ -151,11 +194,18 @@
         for (const key in activeFilters) {
             delete activeFilters[key];
         }
+        // Reset all toggles to OR
+        modeToggles.forEach(toggle => {
+            const checkbox = toggle.querySelector('input');
+            const label = toggle.querySelector('.filter-mode-label');
+            checkbox.checked = false;
+            label.textContent = 'OR';
+        });
+        for (const key in filterModes) {
+            delete filterModes[key];
+        }
         filterCards();
     });
-
-    // Track active filters per category
-    const activeFilters = {};
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -192,8 +242,19 @@
             const line = document.createElement('div');
             line.className = 'filter-active-summary-line';
             const label = categoryLabels[category] || category;
-            line.innerHTML = '<strong>' + label + ':</strong> <span class="summary-values">' +
-                [...values].map(v => v.charAt(0).toUpperCase() + v.slice(1)).join(', ') + '</span>';
+            const isAnd = filterModes[category];
+            const separator = isAnd ? ' AND ' : ', ';
+            const valuesText = [...values].map(v => {
+                // Strip "Category:" prefix for tags
+                const display = category === 'tags' && v.includes(':') ? v.split(':').slice(1).join(':') : v;
+                return display.charAt(0).toUpperCase() + display.slice(1);
+            }).join(separator);
+            const badgeClass = isAnd ? 'summary-mode-and' : 'summary-mode-or';
+            const badgeText = isAnd ? 'AND' : 'OR';
+            const badge = values.size > 1
+                ? ' <span class="summary-mode-badge ' + badgeClass + '">' + badgeText + '</span>'
+                : '';
+            line.innerHTML = '<strong>' + label + ':</strong> <span class="summary-values">' + valuesText + '</span>' + badge;
             activeSummary.appendChild(line);
         }
     }
@@ -207,18 +268,35 @@
             for (const [category, values] of Object.entries(activeFilters)) {
                 if (values.size === 0) continue;
 
+                const isAnd = filterModes[category];
                 let categoryMatch = false;
 
                 if (category === 'types') {
                     const itemTypes = item.dataset.types.split(',').filter(Boolean);
-                    categoryMatch = itemTypes.some(t => values.has(t));
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => itemTypes.includes(v));
+                    } else {
+                        categoryMatch = itemTypes.some(t => values.has(t));
+                    }
                 } else if (category === 'rarity') {
-                    categoryMatch = values.has(item.dataset.rarity);
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => v === item.dataset.rarity);
+                    } else {
+                        categoryMatch = values.has(item.dataset.rarity);
+                    }
                 } else if (category === 'mv') {
-                    categoryMatch = values.has(item.dataset.mv);
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => v === item.dataset.mv);
+                    } else {
+                        categoryMatch = values.has(item.dataset.mv);
+                    }
                 } else if (category === 'tags') {
                     const itemTags = item.dataset.tags.split(',').filter(Boolean);
-                    categoryMatch = itemTags.some(t => values.has(t));
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => itemTags.includes(v));
+                    } else {
+                        categoryMatch = itemTags.some(t => values.has(t));
+                    }
                 }
 
                 if (!categoryMatch) {

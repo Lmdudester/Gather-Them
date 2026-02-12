@@ -28,3 +28,9 @@ def scryfall_page_url(card):
     if not set_code or not number:
         return ''
     return f'https://scryfall.com/card/{set_code}/{number}'
+
+
+@register.filter
+def tag_display(value):
+    """Strip category prefix from tag for display: 'Subtype:Goblin' -> 'Goblin'."""
+    return value.split(':', 1)[1] if ':' in value else value

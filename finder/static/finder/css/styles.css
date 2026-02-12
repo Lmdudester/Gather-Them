@@ -695,7 +695,98 @@ textarea:focus, select:focus {
     flex-shrink: 0;
 }
 
+/* === Filter Mode Toggle (OR/AND) === */
+.filter-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    padding: 0.15rem 0;
+    background: rgba(100, 181, 246, 0.15);
+    border: 1px solid #64b5f6;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.filter-mode-toggle input[type="checkbox"] {
+    display: none;
+}
+
+.filter-mode-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #64b5f6;
+    transition: color 0.2s;
+}
+
+.filter-mode-toggle:has(input:checked) {
+    background: rgba(233, 69, 96, 0.15);
+    border-color: var(--accent);
+}
+
+.filter-mode-toggle:has(input:checked) .filter-mode-label {
+    color: var(--accent-hover);
+}
+
+.summary-mode-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0.05rem 0.4rem;
+    border-radius: 8px;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+}
+
+.summary-mode-or {
+    background: rgba(100, 181, 246, 0.15);
+    color: #64b5f6;
+    border: 1px solid #64b5f6;
+}
+
+.summary-mode-and {
+    background: rgba(233, 69, 96, 0.15);
+    color: var(--accent-hover);
+    border: 1px solid var(--accent);
+}
+
 .filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+
+.filter-section-grouped {
+    align-items: flex-start;
+}
+
+.filter-options-grouped {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.filter-tag-group {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.filter-tag-group-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 6rem;
+    flex-shrink: 0;
+}
+
+.filter-tag-group-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 0.3rem;
@@ -984,12 +1075,16 @@ footer {
     }
 
     .filter-section {
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 0.25rem;
     }
 
     .filter-section-label {
         min-width: 0;
+    }
+
+    .filter-options {
+        width: 100%;
     }
 
     h1 {

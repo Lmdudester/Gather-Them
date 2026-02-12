@@ -100,7 +100,7 @@ finder/
     oracle_patterns.py  161 regex patterns for oracle text theme detection
     set_filter.py     Filter set cards by selected theme tags
   templatetags/
-    card_extras.py    Scryfall image URL template filter
+    card_extras.py    Template filters (Scryfall URLs, tag display)
   templates/finder/   Server-rendered HTML templates
   static/finder/css/  Dark theme responsive CSS
   static/finder/img/  Site logo (favicon + header)

@@ -282,7 +282,7 @@ def results(request):
     filter_types_set = set()
     filter_rarities_set = set()
     filter_mv_set = set()
-    filter_tags_set = set()
+    filter_tags_by_category = {}
     for card, matched_tags, _ in matched_results:
         for t in card.get('types', []):
             filter_types_set.add(t)
@@ -294,13 +294,25 @@ def results(request):
         card['mv_display'] = mv_display
         filter_mv_set.add(mv_display)
         for tag in matched_tags:
-            filter_tags_set.add(tag)
+            category = tag.split(':', 1)[0] if ':' in tag else 'Other'
+            filter_tags_by_category.setdefault(category, set()).add(tag)
 
     filter_types = sorted(filter_types_set)
     filter_rarities = [r for r in rarity_order if r in filter_rarities_set]
     # Sort MV values: numeric first, then 7+
     filter_mvs = sorted(filter_mv_set, key=lambda x: (x == '7+', int(x.rstrip('+'))))
-    filter_tags = sorted(filter_tags_set)
+
+    # Group tags by category in a stable order, skipping categories
+    # that already have their own dedicated filter section
+    skip_categories = {'Card Type'}  # covered by the Type filter
+    category_order = ['Subtype', 'Keyword', 'Oracle Pattern']
+    filter_tags_grouped = []
+    for cat in category_order:
+        if cat in filter_tags_by_category:
+            filter_tags_grouped.append((cat, sorted(filter_tags_by_category[cat])))
+    for cat in sorted(filter_tags_by_category):
+        if cat not in category_order and cat not in skip_categories:
+            filter_tags_grouped.append((cat, sorted(filter_tags_by_category[cat])))
 
     # Get set display names
     from .services.card_lookup import get_sets_for_dropdown
@@ -329,6 +341,6 @@ def results(request):
         'filter_types': filter_types,
         'filter_rarities': filter_rarities,
         'filter_mvs': filter_mvs,
-        'filter_tags': filter_tags,
+        'filter_tags_grouped': filter_tags_grouped,
     }
     return render(request, 'finder/results.html', context)
