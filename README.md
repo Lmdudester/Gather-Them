@@ -2,6 +2,8 @@
 
 A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks. Paste a decklist, select one or more target sets, and find cards that match your deck's themes.
 
+**Note:** This is mostly a pet project for me, but I wanted to do something I'd actually consider using myself. I'm experimenting with practical uses for Claude Code to advance my knowledge in the area.
+
 ## How It Works
 
 **Three-step flow:**
