@@ -6,62 +6,64 @@
     <h1>Find Cards for Your Deck</h1>
     <p class="subtitle">Paste your decklist, pick a set, and discover cards that match your deck's themes.</p>
 
-    <form method="post" action="{% url 'finder:analyze' %}" class="deck-form">
-        {% csrf_token %}
+    <div class="index-layout">
+        <form method="post" action="{% url 'finder:analyze' %}" class="deck-form">
+            {% csrf_token %}
 
-        <div class="form-group">
-            <label for="{{ form.decklist.id_for_label }}">{{ form.decklist.label }}</label>
-            {{ form.decklist }}
-            <p class="field-hint">From Moxfield: <strong>More</strong> &rarr; <strong>Export</strong> &rarr; <strong>Copy Plain Text</strong></p>
-            {% if form.decklist.errors %}
-            <div class="field-errors">
-                {% for error in form.decklist.errors %}
-                <p>{{ error }}</p>
-                {% endfor %}
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="form-row">
             <div class="form-group">
-                <label>{{ form.set_code.label }}</label>
-                <div class="set-picker">
-                    <input type="text" class="set-search" placeholder="Search sets..." autocomplete="off">
-                    <div class="set-dropdown"></div>
-                </div>
-                <div class="set-chips"></div>
-                {{ form.set_code }}
-                <p class="field-hint">Type to search, click to add.</p>
-                {% if form.set_code.errors %}
+                <label for="{{ form.decklist.id_for_label }}">{{ form.decklist.label }}</label>
+                {{ form.decklist }}
+                <p class="field-hint">From Moxfield: <strong>More</strong> &rarr; <strong>Export</strong> &rarr; <strong>Copy Plain Text</strong></p>
+                {% if form.decklist.errors %}
                 <div class="field-errors">
-                    {% for error in form.set_code.errors %}
+                    {% for error in form.decklist.errors %}
                     <p>{{ error }}</p>
                     {% endfor %}
                 </div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.format_name.id_for_label }}">{{ form.format_name.label }}</label>
-                {{ form.format_name }}
+            <div class="form-row">
+                <div class="form-group">
+                    <label>{{ form.set_code.label }}</label>
+                    <div class="set-picker">
+                        <input type="text" class="set-search" placeholder="Search sets..." autocomplete="off">
+                        <div class="set-dropdown"></div>
+                    </div>
+                    <div class="set-chips"></div>
+                    {{ form.set_code }}
+                    <p class="field-hint">Type to search, click to add.</p>
+                    {% if form.set_code.errors %}
+                    <div class="field-errors">
+                        {% for error in form.set_code.errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.format_name.id_for_label }}">{{ form.format_name.label }}</label>
+                    {{ form.format_name }}
+                </div>
             </div>
-        </div>
 
-        <button type="submit" class="btn btn-primary">Analyze Deck</button>
-    </form>
+            <button type="submit" class="btn btn-primary">Analyze Deck</button>
+        </form>
 
-    <div class="db-management">
-        <h2>Database Management</h2>
-        <p class="subtitle">Download the latest card data from MTGJSON. The site will be unavailable during the update.</p>
-        <div class="db-management-row">
-            <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">Update Database</button>
-            </form>
-            {% if db_updated %}
-            <span class="db-updated">Last updated: {{ db_updated|date:"N j, Y" }} at {{ db_updated|time:"g:i A" }}</span>
-            {% endif %}
-        </div>
+        <aside class="db-management">
+            <h2>Database Management</h2>
+            <p class="subtitle">Download the latest card data from MTGJSON.<br>The site will be unavailable during the update.</p>
+            <div class="db-management-row">
+                <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">Update Database</button>
+                </form>
+                {% if db_updated %}
+                <span class="db-updated">Last updated: {{ db_updated|date:"N j, Y" }} at {{ db_updated|time:"g:i A" }}</span>
+                {% endif %}
+            </div>
+        </aside>
     </div>
 </div>
 {% endblock %}

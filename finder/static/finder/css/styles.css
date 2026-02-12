@@ -126,6 +126,7 @@ h1 {
 /* === Forms === */
 .deck-form {
     max-width: 800px;
+    width: 100%;
 }
 
 .form-group {
@@ -134,7 +135,7 @@ h1 {
 
 .form-group label {
     display: block;
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 0.5rem;
     color: var(--text);
 }
@@ -801,32 +802,59 @@ a.card-item {
     border-top: 1px solid var(--border);
 }
 
+/* === Index Layout === */
+.index-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.index-layout .deck-form {
+    flex: 1;
+    min-width: 0;
+}
+
 /* === Database Management === */
 .db-management {
-    margin-top: 3rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    max-width: 800px;
+    width: 350px;
+    flex-shrink: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    position: sticky;
+    top: 1rem;
 }
 
 .db-management h2 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0.5rem;
 }
 
 .db-management .subtitle {
+    font-size: 0.85rem;
     margin-bottom: 1rem;
 }
 
 .db-management-row {
     display: flex;
-    align-items: center;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .db-updated {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+    .index-layout {
+        flex-direction: column;
+    }
+
+    .db-management {
+        width: 100%;
+    }
 }
 
 /* === Maintenance Page === */
