@@ -57,6 +57,15 @@ header nav {
     font-weight: 700;
     color: var(--accent);
     letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }
 
 .logo:hover {
@@ -594,9 +603,6 @@ textarea:focus, select:focus {
 }
 
 .filter-bar-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
     padding: 0.75rem 1rem;
     cursor: pointer;
     list-style: none;
@@ -607,7 +613,13 @@ textarea:focus, select:focus {
     display: none;
 }
 
-.filter-bar-header::before {
+.filter-bar-header-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.filter-bar-header-row::before {
     content: '\25B6';
     font-size: 0.6rem;
     color: var(--text-muted);
@@ -615,7 +627,7 @@ textarea:focus, select:focus {
     flex-shrink: 0;
 }
 
-.filter-bar[open] > .filter-bar-header::before {
+.filter-bar[open] > .filter-bar-header .filter-bar-header-row::before {
     transform: rotate(90deg);
 }
 
@@ -631,19 +643,28 @@ textarea:focus, select:focus {
 
 .filter-active-summary {
     font-size: 0.8rem;
-    color: var(--accent-hover);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-    flex: 1;
+    padding-top: 0.4rem;
+    padding-left: 1.1rem;
+}
+
+.filter-active-summary:empty {
+    display: none;
 }
 
 .filter-bar[open] .filter-active-summary {
     display: none;
 }
 
-.filter-bar-header .btn {
+.filter-active-summary-line {
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.filter-active-summary-line .summary-values {
+    color: var(--accent-hover);
+}
+
+.filter-bar-header-row .btn {
     margin-left: auto;
     flex-shrink: 0;
 }

@@ -1,4 +1,4 @@
-# Gather Them
+# Gather Them - MTG Card Finder
 
 A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks. Paste a decklist, select one or more target sets, and find cards that match your deck's themes.
 
@@ -103,6 +103,7 @@ finder/
     card_extras.py    Scryfall image URL template filter
   templates/finder/   Server-rendered HTML templates
   static/finder/css/  Dark theme responsive CSS
+  static/finder/img/  Site logo (favicon + header)
   middleware.py       Maintenance mode middleware for database updates
   forms.py            Decklist form with set and format dropdowns
   views.py            Views: index, analyze, results, update_db

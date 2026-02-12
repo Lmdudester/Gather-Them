@@ -1,6 +1,6 @@
 {% extends "finder/base.html" %}
 {% load card_extras %}
-{% block title %}Results{% endblock %}
+{% block title %}Results - Gather Them{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -35,10 +35,12 @@
     {% if results %}
     <details class="filter-bar">
         <summary class="filter-bar-header">
-            <span class="filter-label">Filters</span>
-            <span class="filter-count"><span id="visible-count">{{ total_matched }}</span> / {{ total_matched }}</span>
-            <span class="filter-active-summary" id="filter-active-summary"></span>
-            <button type="button" class="btn btn-small" id="clear-filters">Clear</button>
+            <div class="filter-bar-header-row">
+                <span class="filter-label">Filters</span>
+                <span class="filter-count"><span id="visible-count">{{ total_matched }}</span> / {{ total_matched }}</span>
+                <button type="button" class="btn btn-small" id="clear-filters">Clear</button>
+            </div>
+            <div class="filter-active-summary" id="filter-active-summary"></div>
         </summary>
 
         <div class="filter-bar-body">
@@ -181,13 +183,19 @@
         });
     });
 
+    const categoryLabels = {types: 'Type', rarity: 'Rarity', mv: 'Mana Value', tags: 'Matched Tags'};
+
     function updateActiveSummary() {
-        const labels = [];
+        activeSummary.innerHTML = '';
         for (const [category, values] of Object.entries(activeFilters)) {
             if (values.size === 0) continue;
-            labels.push(...values);
+            const line = document.createElement('div');
+            line.className = 'filter-active-summary-line';
+            const label = categoryLabels[category] || category;
+            line.innerHTML = '<strong>' + label + ':</strong> <span class="summary-values">' +
+                [...values].map(v => v.charAt(0).toUpperCase() + v.slice(1)).join(', ') + '</span>';
+            activeSummary.appendChild(line);
         }
-        activeSummary.textContent = labels.length ? labels.join(', ') : '';
     }
 
     function filterCards() {

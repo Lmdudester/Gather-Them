@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Gather Them{% endblock %} - MTG Card Finder</title>
+    <title>{% block title %}Gather Them - MTG Card Finder{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'finder/css/styles.css' %}?v=4">
+    <link rel="icon" type="image/png" href="{% static 'finder/img/logo.png' %}">
+    <link rel="stylesheet" href="{% static 'finder/css/styles.css' %}?v=5">
 </head>
 <body>
     <header>
         <nav>
-            <a href="{% url 'finder:index' %}" class="logo">Gather Them</a>
+            <a href="{% url 'finder:index' %}" class="logo">
+                <img src="{% static 'finder/img/logo.png' %}" alt="" class="logo-icon">
+                Gather Them - MTG Card Finder
+            </a>
             <span class="tagline">Find new cards for your decks</span>
         </nav>
     </header>
