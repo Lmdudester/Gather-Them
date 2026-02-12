@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import DecklistForm
 from .middleware import is_maintenance_mode, set_maintenance_mode, set_update_result
-from .services.card_lookup import get_set_cards, lookup_cards
+from .services.card_lookup import get_set_cards, get_set_lands, lookup_cards
 from .services.db_updater import DatabaseUpdateError, update_database
 from .services.deck_parser import parse_decklist
 from .services.set_filter import filter_cards_by_tags
@@ -195,6 +195,7 @@ def results(request):
         return render(request, 'finder/index.html', {'form': DecklistForm()})
 
     selected_tags = request.POST.getlist('tags')
+    include_lands = request.POST.get('include_lands') == '1'
     set_codes_json = request.POST.get('set_codes', '[]')
     format_name = request.POST.get('format_name', '')
     color_identity_json = request.POST.get('color_identity', '[]')
@@ -215,10 +216,10 @@ def results(request):
     except (json.JSONDecodeError, TypeError):
         deck_card_names = set()
 
-    if not selected_tags or not set_codes:
+    if (not selected_tags and not include_lands) or not set_codes:
         return render(request, 'finder/index.html', {
             'form': DecklistForm(),
-            'error': 'Please select at least one theme tag.',
+            'error': 'Please select at least one theme tag or include lands.',
         })
 
     # Get cards from target sets with format + color filtering
@@ -243,6 +244,38 @@ def results(request):
             (card, tags, count) for card, tags, count in matched_results
             if card.get('name') not in deck_card_names
         ]
+
+    # Merge lands if requested
+    if include_lands:
+        land_cards = get_set_lands(
+            set_codes,
+            format_name=format_name or None,
+            deck_color_identity=color_identity if color_identity else None,
+        )
+
+        # Exclude deck cards from lands too
+        if deck_card_names:
+            land_cards = [c for c in land_cards if c.get('name') not in deck_card_names]
+
+        # Build lookup of already-matched card names for dedup
+        matched_names = {card.get('name') for card, _, _ in matched_results}
+
+        for land in land_cards:
+            name = land.get('name')
+            if name in matched_names:
+                # Already in results — add "Land" to its matched tags
+                for i, (card, tags, count) in enumerate(matched_results):
+                    if card.get('name') == name and 'Land' not in tags:
+                        tags.append('Land')
+                        matched_results[i] = (card, tags, count + 1)
+                        break
+            else:
+                # New result with "Land" tag
+                matched_results.append((land, ['Land'], 1))
+                matched_names.add(name)
+
+        # Re-sort after merging
+        matched_results.sort(key=lambda x: (-x[2], x[0].get('name', '')))
 
     # Pre-compute filter data attributes on each card and collect distinct values
     rarity_order = ['common', 'uncommon', 'rare', 'mythic']
@@ -285,6 +318,7 @@ def results(request):
     context = {
         'results': matched_results,
         'selected_tags': selected_tags,
+        'include_lands': include_lands,
         'set_codes_json': json.dumps(set_codes),
         'set_displays': set_displays,
         'format_name': format_name,

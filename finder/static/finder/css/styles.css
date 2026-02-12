@@ -420,7 +420,7 @@ textarea:focus, select:focus {
     align-items: center;
 }
 
-.select-controls .btn-primary {
+.select-controls .lands-toggle {
     margin-left: auto;
 }
 
@@ -515,6 +515,38 @@ textarea:focus, select:focus {
     border-radius: 10px;
     flex-shrink: 0;
     margin-left: auto;
+}
+
+/* === Lands Toggle (Analysis Page) === */
+.lands-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: rgba(233, 69, 96, 0.12);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+}
+
+.lands-toggle:has(input:checked) {
+    background: rgba(76, 175, 80, 0.15);
+    border-color: var(--success);
+}
+
+.lands-toggle input[type="checkbox"] {
+    display: none;
+}
+
+.lands-toggle-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent-hover);
+}
+
+.lands-toggle:has(input:checked) .lands-toggle-label {
+    color: #81c784;
 }
 
 /* === Selected Tags Summary === */

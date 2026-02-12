@@ -17,6 +17,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
 - **3-step card name lookup** — exact name, then front face name (for DFCs/adventures like Bonecrusher Giant), then prefix match
+- **Dedicated land discovery** — "Include All Lands" toggle finds non-basic lands using intersection-based color identity (lands sharing at least one color with your deck), separate from theme analysis
 - **Deck card exclusion** — cards already in your decklist are filtered out of results
 - **Multi-set search** — select multiple target sets via a searchable picker
 - **272 playable sets** sorted by release date

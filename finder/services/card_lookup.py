@@ -172,6 +172,86 @@ def _aggregate_multi_face(cards_by_name):
     return result
 
 
+def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
+    """Get non-basic lands from sets using intersection-based color identity.
+
+    Unlike get_set_cards (subset check), this includes a land if it shares
+    at least one color with the deck's identity. Colorless lands are always
+    included.
+
+    Args:
+        set_codes: A set code string or list of set codes.
+        format_name: Format column name for legality filtering.
+        deck_color_identity: List of colors for intersection-based CI filtering.
+
+    Returns:
+        List of card dicts (non-basic lands only).
+    """
+    if isinstance(set_codes, str):
+        set_codes = [set_codes]
+
+    query = """
+        SELECT c.*, ci.scryfallId
+        FROM cards c
+        LEFT JOIN cardIdentifiers ci ON c.uuid = ci.uuid
+    """
+    placeholders = ','.join('?' for _ in set_codes)
+    params = list(set_codes)
+    conditions = [
+        f"c.setCode IN ({placeholders})",
+        "c.language = 'English'",
+    ]
+
+    # Format legality filter
+    if format_name:
+        valid_formats = {
+            'commander', 'standard', 'modern', 'pioneer', 'legacy', 'vintage',
+            'pauper', 'historic', 'alchemy', 'brawl', 'oathbreaker', 'duel',
+            'penny', 'gladiator', 'oldschool', 'premodern', 'paupercommander',
+            'standardbrawl', 'timeless', 'future',
+        }
+        if format_name in valid_formats:
+            query += " LEFT JOIN cardLegalities cl ON c.uuid = cl.uuid"
+            conditions.append(f"cl.{format_name} IN ('Legal', 'Restricted')")
+
+    query += " WHERE " + " AND ".join(conditions)
+
+    with get_db() as conn:
+        rows = conn.execute(query, params).fetchall()
+
+    cards = []
+    seen_names = set()
+    for row in rows:
+        card = _row_to_card(row)
+        card['scryfallId'] = row['scryfallId']
+
+        # Only lands
+        if 'Land' not in card.get('types', []):
+            continue
+
+        # Exclude basic lands
+        if 'Basic' in card.get('supertypes', []):
+            continue
+
+        # Deduplicate by name
+        name = card['name']
+        if name in seen_names:
+            continue
+        seen_names.add(name)
+
+        # Intersection-based color identity: colorless always included,
+        # otherwise at least one color must overlap with the deck's CI
+        if deck_color_identity is not None:
+            card_ci = set(card.get('colorIdentity', []))
+            deck_ci = set(deck_color_identity)
+            if card_ci and not card_ci & deck_ci:
+                continue
+
+        cards.append(card)
+
+    return cards
+
+
 def get_set_cards(set_codes, format_name=None, deck_color_identity=None):
     """Get all cards from one or more sets, with optional format/color filtering.
 

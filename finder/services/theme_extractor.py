@@ -11,6 +11,9 @@ _SKIP_KEYWORDS = {
     'Convert', 'Specialize', 'Fuse', 'Split second',
 }
 
+# Basic land subtypes — too common to be useful as deck themes
+_SKIP_SUBTYPES = {'Plains', 'Island', 'Swamp', 'Mountain', 'Forest'}
+
 
 def extract_themes(cards_with_qty):
     """Extract and rank themes from a deck's cards.
@@ -32,18 +35,20 @@ def extract_themes(cards_with_qty):
     total_cards = sum(qty for qty, _ in cards_with_qty)
 
     for qty, card in cards_with_qty:
-        # Subtypes
+        # Subtypes (skip basic land subtypes)
         for st in card.get('subtypes', []):
-            subtype_counts[st] += qty
+            if st not in _SKIP_SUBTYPES:
+                subtype_counts[st] += qty
 
         # Keywords (skip non-thematic ones)
         for kw in card.get('keywords', []):
             if kw not in _SKIP_KEYWORDS:
                 keyword_counts[kw] += qty
 
-        # Card types
+        # Card types (skip "Land" — handled separately)
         for ct in card.get('types', []):
-            card_type_counts[ct] += qty
+            if ct != 'Land':
+                card_type_counts[ct] += qty
 
         # Color identity
         for c in card.get('colorIdentity', []):
