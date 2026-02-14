@@ -7,12 +7,15 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import DecklistForm
 from .middleware import is_maintenance_mode, set_maintenance_mode, set_update_result
-from .services.card_lookup import get_set_cards, get_set_lands, lookup_cards
+from .services.card_lookup import (
+    get_random_flavor_text, get_set_cards, get_set_lands, lookup_cards,
+)
 from .services.db_updater import DatabaseUpdateError, update_database
 from .services.deck_parser import parse_decklist
 from .services.set_filter import filter_cards_by_tags
@@ -55,6 +58,14 @@ def update_db(request):
     set_maintenance_mode(True)
     threading.Thread(target=_run_update, daemon=True).start()
     return redirect('finder:index')
+
+
+def random_flavor(request):
+    """API endpoint returning a random card flavor text as JSON."""
+    result = get_random_flavor_text()
+    if result:
+        return JsonResponse(result)
+    return JsonResponse({'error': 'No flavor text found'}, status=404)
 
 
 TIER_LABELS = ['Core', 'Strong', 'Moderate', 'Minor', 'Fringe']

@@ -113,7 +113,7 @@ finder/
   static/finder/img/  Site logo (favicon + header)
   middleware.py       Maintenance mode middleware for database updates
   forms.py            Decklist form with set and format dropdowns
-  views.py            Views: index, analyze, results, update_db, refresh_patterns
+  views.py            Views: index, analyze, results, update_db, refresh_patterns, random_flavor
 ```
 
 ## Data Sources

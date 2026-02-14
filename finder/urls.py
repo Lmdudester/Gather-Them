@@ -10,4 +10,5 @@ urlpatterns = [
     path('results/', views.results, name='results'),
     path('update-db/', views.update_db, name='update_db'),
     path('refresh-patterns/', views.refresh_patterns, name='refresh_patterns'),
+    path('api/random-flavor/', views.random_flavor, name='random_flavor'),
 ]

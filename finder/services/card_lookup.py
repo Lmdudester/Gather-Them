@@ -16,6 +16,24 @@ def get_db():
         conn.close()
 
 
+def get_random_flavor_text():
+    """Return a random card name + flavor text from the database."""
+    query = """
+        SELECT c.name, c.flavorText
+        FROM cards c
+        WHERE c.language = 'English'
+          AND c.flavorText IS NOT NULL
+          AND c.flavorText != ''
+        ORDER BY RANDOM()
+        LIMIT 1
+    """
+    with get_db() as conn:
+        row = conn.execute(query).fetchone()
+    if row:
+        return {'name': row['name'], 'flavorText': row['flavorText']}
+    return None
+
+
 def get_sets_for_dropdown():
     """Return sets suitable for the dropdown, recent first.
 
