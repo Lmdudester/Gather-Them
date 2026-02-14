@@ -1,5 +1,5 @@
 {% extends "finder/base.html" %}
-{% load card_extras %}
+{% load card_extras static %}
 {% block title %}Deck Analysis - Gather Them{% endblock %}
 
 {% block content %}
@@ -104,6 +104,10 @@
         </div>
     </form>
 </div>
+<div class="loading-overlay" id="loading-overlay">
+    <img src="{% static 'finder/img/logo.png' %}" alt="" class="loading-logo">
+    <div class="loading-flavor" id="loading-flavor">Gathering cards...</div>
+</div>
 
 <script>
 function toggleAll(checked) {
@@ -152,6 +156,47 @@ document.getElementById('view-toggle').addEventListener('click', function() {
         category.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.removeAttribute('name'));
         combined.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.setAttribute('name', 'tags'));
         this.textContent = 'By Category';
+    }
+});
+
+// Loading overlay on form submit
+(function () {
+    var form = document.querySelector('.theme-form');
+    var submitting = false;
+
+    form.addEventListener('submit', function (e) {
+        if (submitting) return;
+        e.preventDefault();
+
+        var overlay = document.getElementById('loading-overlay');
+        overlay.classList.add('active');
+
+        var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
+
+        function doSubmit() {
+            if (submitting) return;
+            submitting = true;
+            form.submit();
+        }
+
+        var flavorDone = fetch("{% url 'finder:random_flavor' %}")
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var el = document.getElementById('loading-flavor');
+                el.innerHTML = '\u201C' + data.flavorText + '\u201D'
+                    + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
+            })
+            .catch(function () {});
+
+        Promise.all([flavorDone, minDelay]).then(doSubmit);
+        setTimeout(doSubmit, 6000);
+    });
+})();
+
+// Hide overlay when returning via back button (bfcache restore)
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+        document.getElementById('loading-overlay').classList.remove('active');
     }
 });
 </script>

@@ -179,17 +179,47 @@
 })();
 
 // Loading overlay on form submit
-document.querySelector('.deck-form').addEventListener('submit', function () {
-    var overlay = document.getElementById('loading-overlay');
-    overlay.classList.add('active');
-    fetch("{% url 'finder:random_flavor' %}")
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            var el = document.getElementById('loading-flavor');
-            el.innerHTML = '\u201C' + data.flavorText + '\u201D'
-                + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
-        })
-        .catch(function () {}); // keep default text on failure
+(function () {
+    var form = document.querySelector('.deck-form');
+    var submitting = false;
+
+    form.addEventListener('submit', function (e) {
+        if (submitting) return;   // allow the real submit to go through
+        e.preventDefault();
+
+        var overlay = document.getElementById('loading-overlay');
+        overlay.classList.add('active');
+
+        var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
+
+        function doSubmit() {
+            if (submitting) return;
+            submitting = true;
+            form.submit();
+        }
+
+        var flavorDone = fetch("{% url 'finder:random_flavor' %}")
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var el = document.getElementById('loading-flavor');
+                el.innerHTML = '\u201C' + data.flavorText + '\u201D'
+                    + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
+            })
+            .catch(function () {});  // keep default text on failure
+
+        // Submit once both the flavor text has loaded AND 3s have elapsed
+        Promise.all([flavorDone, minDelay]).then(doSubmit);
+
+        // Fallback: submit anyway after 6s if fetch hangs
+        setTimeout(doSubmit, 6000);
+    });
+})();
+
+// Hide overlay when returning via back button (bfcache restore)
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+        document.getElementById('loading-overlay').classList.remove('active');
+    }
 });
 </script>
 {% endblock %}
