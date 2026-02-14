@@ -54,6 +54,10 @@ MTGJSON_DOWNLOAD_URL = os.environ.get(
     'MTGJSON_DOWNLOAD_URL',
     'https://mtgjson.com/api/v5/AllPrintings.sqlite.zip',
 )
+ORACLE_PATTERNS_PATH = os.environ.get(
+    'ORACLE_PATTERNS_PATH',
+    str(BASE_DIR / 'finder' / 'data' / 'oracle_patterns.json'),
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

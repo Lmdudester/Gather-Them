@@ -34,6 +34,18 @@ def _run_update():
 
 
 @require_POST
+def refresh_patterns(request):
+    """Reload oracle text patterns from the JSON config file."""
+    from .services.oracle_patterns import refresh_cache
+    try:
+        refresh_cache()
+        messages.success(request, 'Oracle patterns refreshed successfully.')
+    except Exception as e:
+        messages.error(request, f'Failed to refresh oracle patterns: {e}')
+    return redirect('finder:index')
+
+
+@require_POST
 def update_db(request):
     """Kick off a background database update and redirect to maintenance page."""
     if is_maintenance_mode():

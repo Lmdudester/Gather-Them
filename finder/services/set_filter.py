@@ -1,6 +1,4 @@
-import re
-
-from .oracle_patterns import ORACLE_PATTERN_MAP
+from .oracle_patterns import get_oracle_pattern_map
 
 
 def filter_cards_by_tags(cards, selected_tags):
@@ -63,7 +61,7 @@ def filter_cards_by_tags(cards, selected_tags):
 
 def _matches_oracle_pattern(pattern_label, text_lower):
     """Check if oracle text matches a named pattern."""
-    regex = ORACLE_PATTERN_MAP.get(pattern_label)
-    if regex:
-        return bool(re.search(regex, text_lower))
+    compiled_re = get_oracle_pattern_map().get(pattern_label)
+    if compiled_re:
+        return bool(compiled_re.search(text_lower))
     return False

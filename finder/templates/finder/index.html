@@ -63,6 +63,15 @@
                 <span class="db-updated">Last updated: {{ db_updated|date:"N j, Y" }} at {{ db_updated|time:"g:i A" }}</span>
                 {% endif %}
             </div>
+            <hr class="db-management-divider">
+            <h2>Oracle Patterns</h2>
+            <p class="subtitle">Reload oracle text patterns from the config file.</p>
+            <div class="db-management-row">
+                <form method="post" action="{% url 'finder:refresh_patterns' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">Refresh Oracle Patterns</button>
+                </form>
+            </div>
         </aside>
     </div>
 </div>

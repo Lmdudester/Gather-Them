@@ -1,7 +1,6 @@
-import re
 from collections import Counter
 
-from .oracle_patterns import ORACLE_PATTERNS, ORACLE_PATTERN_EXCLUDE_TYPES
+from .oracle_patterns import get_oracle_patterns, get_oracle_pattern_exclude_types
 
 
 # Keywords that are non-thematic / not useful for deck-building discovery
@@ -34,6 +33,9 @@ def extract_themes(cards_with_qty):
 
     total_cards = sum(qty for qty, _ in cards_with_qty)
 
+    oracle_patterns = get_oracle_patterns()
+    exclude_types = get_oracle_pattern_exclude_types()
+
     for qty, card in cards_with_qty:
         # Subtypes (skip basic land subtypes)
         for st in card.get('subtypes', []):
@@ -59,11 +61,11 @@ def extract_themes(cards_with_qty):
         if text:
             text_lower = text.lower()
             card_types = set(card.get('types', []))
-            for pattern, label in ORACLE_PATTERNS:
-                excluded = ORACLE_PATTERN_EXCLUDE_TYPES.get(label)
+            for compiled_re, label in oracle_patterns:
+                excluded = exclude_types.get(label)
                 if excluded and card_types & excluded:
                     continue
-                if re.search(pattern, text_lower):
+                if compiled_re.search(text_lower):
                     oracle_counts[label] += qty
 
     # Filter out themes appearing only once when deck has 10+ cards

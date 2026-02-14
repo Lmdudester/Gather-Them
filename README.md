@@ -24,6 +24,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Multi-set search** — select multiple target sets via a searchable picker
 - **272 playable sets** sorted by release date
 - **One-click database update** — download the latest MTGJSON data from within the app, with a maintenance page shown during the update
+- **Hot-reloadable oracle patterns** — patterns are stored in a JSON config file (`finder/data/oracle_patterns.json`) and can be reloaded at runtime via a button on the homepage, no server restart needed
 
 ## Requirements
 
@@ -88,18 +89,21 @@ docker restart gather-them
 | `GIT_REPO_URL` | `https://github.com/Lmdudester/Gather-Them.git` | Repository URL |
 | `SECRET_KEY` | (insecure default) | Django secret key |
 | `ALLOWED_HOSTS` | (empty) | Comma-separated allowed hosts (use `*` to allow all, e.g. for Tailscale access) |
+| `ORACLE_PATTERNS_PATH` | `finder/data/oracle_patterns.json` | Path to oracle text patterns JSON config file |
 
 ## Project Structure
 
 ```
 gather_them/          Django project settings and URL config
 finder/
+  data/
+    oracle_patterns.json  161 regex patterns for oracle text theme detection (editable config)
   services/
     card_lookup.py    SQLite queries (card lookup, set listing, set card retrieval)
     db_updater.py     MTGJSON database download and atomic replacement
     deck_parser.py    Decklist text parsing
     theme_extractor.py  Theme extraction and frequency ranking
-    oracle_patterns.py  161 regex patterns for oracle text theme detection
+    oracle_patterns.py  JSON loader with thread-safe caching and hot-reload
     set_filter.py     Filter set cards by selected theme tags
   templatetags/
     card_extras.py    Template filters (Scryfall URLs, tag display)
@@ -108,7 +112,7 @@ finder/
   static/finder/img/  Site logo (favicon + header)
   middleware.py       Maintenance mode middleware for database updates
   forms.py            Decklist form with set and format dropdowns
-  views.py            Views: index, analyze, results, update_db
+  views.py            Views: index, analyze, results, update_db, refresh_patterns
 ```
 
 ## Data Sources

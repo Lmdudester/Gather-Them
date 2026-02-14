@@ -1,0 +1,817 @@
+{
+    "patterns": [
+        {
+            "regex": "\\+1/\\+1 counter",
+            "label": "+1/+1 counters",
+            "category": "Counters"
+        },
+        {
+            "regex": "-1/-1 counter",
+            "label": "-1/-1 counters",
+            "category": "Counters"
+        },
+        {
+            "regex": "(charge|lore|loyalty|verse|time|age|fade)\\s+counter",
+            "label": "Special counters",
+            "category": "Counters"
+        },
+        {
+            "regex": "(oil|stun|shield|finality)\\s+counter",
+            "label": "Keyword counters",
+            "category": "Counters"
+        },
+        {
+            "regex": "double\\s+the\\s+number\\s+of\\s+.*?counter",
+            "label": "Counter doubling",
+            "category": "Counters"
+        },
+        {
+            "regex": "enters\\s+.*?with\\s+.*?\\+1/\\+1\\s+counter",
+            "label": "Enters with counters",
+            "category": "Counters"
+        },
+        {
+            "regex": "create[s]?\\s+.*?token",
+            "label": "Create token",
+            "category": "Tokens"
+        },
+        {
+            "regex": "treasure\\s+token",
+            "label": "Treasure",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(food\\s+token|create.*?Food)",
+            "label": "Food tokens",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(clue\\s+token|create.*?Clue)",
+            "label": "Clue tokens",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(blood\\s+token|create.*?Blood)",
+            "label": "Blood tokens",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(map\\s+token|create.*?Map)",
+            "label": "Map tokens",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(powerstone\\s+token|create.*?Powerstone)",
+            "label": "Powerstone tokens",
+            "category": "Tokens"
+        },
+        {
+            "regex": "(populate)",
+            "label": "Populate",
+            "category": "Tokens"
+        },
+        {
+            "regex": "for\\s+each\\s+(creature|token)\\s+you\\s+control",
+            "label": "Go wide payoff",
+            "category": "Go wide / token payoffs"
+        },
+        {
+            "regex": "token[s]?\\s+you\\s+control",
+            "label": "Token count matters",
+            "category": "Go wide / token payoffs"
+        },
+        {
+            "regex": "draw[s]?\\s+.*?card",
+            "label": "Draw cards",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "scry\\s+\\d+",
+            "label": "Scry",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "surveil\\s+\\d+",
+            "label": "Surveil",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "(look at the top|reveal the top).*?(library)",
+            "label": "Topdeck manipulation",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "exile[s]?\\s+.*?top.*?(play|cast|until)",
+            "label": "Impulse draw",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "(whenever|when).*?(draw|draws)\\s+.*?card",
+            "label": "Draw trigger",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "(cycling|cycle\\s+)",
+            "label": "Cycling",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "(prowess)",
+            "label": "Prowess",
+            "category": "Card draw & selection"
+        },
+        {
+            "regex": "destroy\\s+(target|all|each)",
+            "label": "Destroy",
+            "category": "Removal"
+        },
+        {
+            "regex": "destroy\\s+(all|each)\\s+(creature|permanent|artifact|enchantment)",
+            "label": "Board wipe",
+            "category": "Removal"
+        },
+        {
+            "regex": "exile[s]?\\s+(target|all|each|a |the )",
+            "label": "Exile",
+            "category": "Removal"
+        },
+        {
+            "regex": "(deal|deals)\\s+\\d+\\s+damage",
+            "label": "Deal damage",
+            "category": "Removal"
+        },
+        {
+            "regex": "deals?\\s+damage\\s+equal\\s+to",
+            "label": "Damage scaling",
+            "category": "Removal"
+        },
+        {
+            "regex": "deals?\\s+.*?damage\\s+to\\s+(each|all)\\s+(creature|opponent|player)",
+            "label": "Mass damage",
+            "category": "Removal"
+        },
+        {
+            "regex": "fight[s]?\\s",
+            "label": "Fight",
+            "category": "Removal"
+        },
+        {
+            "regex": "(bite|deals damage equal to its power)",
+            "label": "Bite",
+            "category": "Removal"
+        },
+        {
+            "regex": "(sacrifice|sacrifices)\\s+(a|an|another|target)",
+            "label": "Sacrifice",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(whenever|when)\\s+.*?\\s+dies",
+            "label": "Death trigger",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(each|all)\\s+opponent[s]?\\s+lose",
+            "label": "Drain",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(blood\\s+artist|whenever.*?dies.*?lose)",
+            "label": "Aristocrats",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "whenever\\s+you\\s+sacrifice",
+            "label": "Sacrifice trigger",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(exploit|devour|emerge)",
+            "label": "Sacrifice mechanic",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(each\\s+opponent|target\\s+opponent)\\s+sacrifices",
+            "label": "Edict effect",
+            "category": "Sacrifice & death"
+        },
+        {
+            "regex": "(from|to|into|in)\\s+(your|a|the)\\s+graveyard",
+            "label": "Graveyard",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "return[s]?\\s+.*?\\s+from\\s+.*?graveyard",
+            "label": "Recursion",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(put|return)\\s+.*?from\\s+.*?graveyard\\s+.*?(battlefield|onto the battlefield)",
+            "label": "Reanimate",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(exile|exiles)\\s+.*?from\\s+.*?graveyard",
+            "label": "Graveyard hate",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(mill|puts?\\s+.*?cards?\\s+.*?into\\s+.*?graveyard)",
+            "label": "Mill",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(dredge|delve|escape|unearth|flashback|retrace|embalm|eternalize|disturb|aftermath)",
+            "label": "Graveyard cast",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(delirium|threshold)",
+            "label": "Graveyard threshold",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(cards?\\s+in\\s+your\\s+graveyard|graveyard\\s+count)",
+            "label": "Graveyard payoff",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(gain|gains)\\s+\\d+\\s+life",
+            "label": "Gain life",
+            "category": "Graveyard"
+        },
+        {
+            "regex": "(whenever|when).*?gain[s]?\\s+life",
+            "label": "Lifegain trigger",
+            "category": "Life"
+        },
+        {
+            "regex": "(lose|loses)\\s+\\d+\\s+life",
+            "label": "Life loss",
+            "category": "Life"
+        },
+        {
+            "regex": "pay[s]?\\s+\\d+\\s+life",
+            "label": "Pay life",
+            "category": "Life"
+        },
+        {
+            "regex": "(life\\s+total\\s+becomes|exchange\\s+life)",
+            "label": "Life total manipulation",
+            "category": "Life"
+        },
+        {
+            "regex": "(lifelink)",
+            "label": "Lifelink",
+            "category": "Life"
+        },
+        {
+            "regex": "(whenever|when)\\s+.*?\\s+attacks",
+            "label": "Attack trigger",
+            "category": "Life"
+        },
+        {
+            "regex": "(whenever|when)\\s+.*?\\s+deals\\s+combat\\s+damage",
+            "label": "Combat damage trigger",
+            "category": "Combat"
+        },
+        {
+            "regex": "(additional\\s+combat|extra\\s+combat)",
+            "label": "Extra combat",
+            "category": "Combat"
+        },
+        {
+            "regex": "(can\\'t\\s+be\\s+blocked|unblockable)",
+            "label": "Evasion",
+            "category": "Combat"
+        },
+        {
+            "regex": "(double\\s+strike)",
+            "label": "Double strike",
+            "category": "Combat"
+        },
+        {
+            "regex": "(whenever|when)\\s+.*?\\s+blocks",
+            "label": "Block trigger",
+            "category": "Combat"
+        },
+        {
+            "regex": "(goad|goaded)",
+            "label": "Goad",
+            "category": "Combat"
+        },
+        {
+            "regex": "(must\\s+attack|attacks?\\s+each\\s+(combat|turn)\\s+if\\s+able)",
+            "label": "Forced combat",
+            "category": "Combat"
+        },
+        {
+            "regex": "gain\\s+control\\s+of\\s+target.*?until\\s+end\\s+of\\s+turn",
+            "label": "Threaten",
+            "category": "Combat"
+        },
+        {
+            "regex": "exile[s]?\\s+.*?return[s]?\\s+.*?(battlefield|to the battlefield)",
+            "label": "Blink",
+            "category": "Combat"
+        },
+        {
+            "regex": "return[s]?\\s+.*?to\\s+(its\\s+)?owner\\'s\\s+hand",
+            "label": "Bounce",
+            "category": "Blink & bounce"
+        },
+        {
+            "regex": "(flicker|exile.*?then return)",
+            "label": "Flicker",
+            "category": "Blink & bounce"
+        },
+        {
+            "regex": "(copy|copies)\\s+(target|a|that)\\s+(spell|creature|permanent|artifact|enchantment)",
+            "label": "Copy",
+            "category": "Blink & bounce"
+        },
+        {
+            "regex": "(enters\\s+.*?as\\s+a\\s+copy|becomes?\\s+a\\s+copy)",
+            "label": "Clone",
+            "category": "Copy & clone"
+        },
+        {
+            "regex": "(copy|copies)\\s+that\\s+spell",
+            "label": "Spell copy",
+            "category": "Copy & clone"
+        },
+        {
+            "regex": "(storm)",
+            "label": "Storm",
+            "category": "Copy & clone"
+        },
+        {
+            "regex": "gain\\s+control\\s+of\\s+(target|a|each)",
+            "label": "Steal",
+            "category": "Copy & clone"
+        },
+        {
+            "regex": "(tap|taps)\\s+(target|an?)\\s+",
+            "label": "Tap control",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(doesn\\'t\\s+untap|don\\'t\\s+untap)",
+            "label": "Freeze",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(counter|counters)\\s+(target|a|that)\\s+spell",
+            "label": "Counterspell",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(hexproof|shroud|protection\\s+from|ward)",
+            "label": "Protection",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(indestructible)",
+            "label": "Indestructible",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(can\\'t\\s+cast|can\\'t\\s+activate|can\\'t\\s+be\\s+cast)",
+            "label": "Lockdown",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(search|searches)\\s+your\\s+library\\s+for\\s+.*?(land|basic)",
+            "label": "Land ramp",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "add[s]?\\s+\\{",
+            "label": "Mana production",
+            "category": "Control & theft"
+        },
+        {
+            "regex": "(add[s]?\\s+.*?mana\\s+of\\s+any)",
+            "label": "Mana fixing",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "(cost[s]?\\s+\\{?\\d*\\}?\\s*(less|more)|reduce[s]?\\s+.*?cost)",
+            "label": "Cost reduction",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "(without\\s+paying\\s+.*?mana\\s+cost|cast\\s+.*?without\\s+paying)",
+            "label": "Free cast",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "(untap[s]?\\s+(target|all|each)\\s+land)",
+            "label": "Land untap",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "untap[s]?\\s+(target|another|a|an)\\s+(creature|permanent)",
+            "label": "Untap creature",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "untap\\s+(all|each)\\s+(creature|permanent)",
+            "label": "Mass untap",
+            "category": "Ramp & mana"
+        },
+        {
+            "regex": "untap\\s+(it|that\\s+creature|enchanted\\s+creature)",
+            "label": "Self-untap",
+            "category": "Untap"
+        },
+        {
+            "regex": "whenever.*untaps",
+            "label": "Untap trigger",
+            "category": "Untap"
+        },
+        {
+            "regex": "(search|searches)\\s+your\\s+library",
+            "label": "Tutor",
+            "category": "Untap"
+        },
+        {
+            "regex": "(reveal|look\\s+at)\\s+cards?\\s+from\\s+the\\s+top",
+            "label": "Topdeck peek",
+            "category": "Untap"
+        },
+        {
+            "regex": "enters(\\s+the\\s+battlefield)?",
+            "label": "ETB trigger",
+            "category": "Tutor & library"
+        },
+        {
+            "regex": "(leaves|left)\\s+the\\s+battlefield",
+            "label": "LTB trigger",
+            "category": "Tutor & library"
+        },
+        {
+            "regex": "(whenever\\s+a(n|nother)?\\s+(creature|permanent|artifact|enchantment)\\s+enters)",
+            "label": "ETB payoff",
+            "category": "Enters the battlefield"
+        },
+        {
+            "regex": "(discard|discards)\\s+(a|your|their|cards?)",
+            "label": "Discard",
+            "category": "Enters the battlefield"
+        },
+        {
+            "regex": "(each\\s+opponent|target\\s+(opponent|player))\\s+discards",
+            "label": "Hand disruption",
+            "category": "Enters the battlefield"
+        },
+        {
+            "regex": "(madness)",
+            "label": "Madness",
+            "category": "Discard & hand disruption"
+        },
+        {
+            "regex": "(no\\s+maximum\\s+hand\\s+size|hand\\s+size)",
+            "label": "Hand size matters",
+            "category": "Discard & hand disruption"
+        },
+        {
+            "regex": "(cards?\\s+in\\s+(your\\s+)?hand|number\\s+of\\s+cards?\\s+in)",
+            "label": "Hand count matters",
+            "category": "Discard & hand disruption"
+        },
+        {
+            "regex": "(equip|equipped\\s+creature)",
+            "label": "Equipment",
+            "category": "Discard & hand disruption"
+        },
+        {
+            "regex": "(enchanted\\s+creature|aura)",
+            "label": "Aura",
+            "category": "Discard & hand disruption"
+        },
+        {
+            "regex": "(reconfigure)",
+            "label": "Reconfigure",
+            "category": "Equipment & auras"
+        },
+        {
+            "regex": "(attach|attached\\s+to)",
+            "label": "Attachment",
+            "category": "Equipment & auras"
+        },
+        {
+            "regex": "whenever\\s+you\\s+cast\\s+an?\\s+enchantment",
+            "label": "Enchantress trigger",
+            "category": "Equipment & auras"
+        },
+        {
+            "regex": "(whenever\\s+an?\\s+enchantment\\s+enters|constellation)",
+            "label": "Constellation",
+            "category": "Equipment & auras"
+        },
+        {
+            "regex": "for\\s+each\\s+enchantment\\s+you\\s+control",
+            "label": "Enchantment count",
+            "category": "Enchantress / constellation"
+        },
+        {
+            "regex": "(creatures?\\s+you\\s+control\\s+get|other\\s+creatures?\\s+.*?\\s+get)\\s+\\+",
+            "label": "Anthem",
+            "category": "Enchantress / constellation"
+        },
+        {
+            "regex": "(creatures?\\s+of\\s+the\\s+chosen\\s+type|choose\\s+a\\s+creature\\s+type)",
+            "label": "Tribal payoff",
+            "category": "Enchantress / constellation"
+        },
+        {
+            "regex": "(changeling)",
+            "label": "Changeling",
+            "category": "Tribal / type matters"
+        },
+        {
+            "regex": "(whenever|when)\\s+you\\s+cast\\s+(a|an)\\s+(instant|sorcery|noncreature)",
+            "label": "Spellcast trigger",
+            "category": "Tribal / type matters"
+        },
+        {
+            "regex": "(instant[s]?\\s+and\\s+sorcery|sorceries?\\s+and\\s+instants?)\\s+(card|in\\s+your\\s+graveyard)",
+            "label": "Spell graveyard",
+            "category": "Tribal / type matters"
+        },
+        {
+            "regex": "(magecraft)",
+            "label": "Magecraft",
+            "category": "Spellslinger"
+        },
+        {
+            "regex": "whenever\\s+.*?artifact\\s+enters",
+            "label": "Artifact ETB trigger",
+            "category": "Spellslinger"
+        },
+        {
+            "regex": "for\\s+each\\s+artifact\\s+you\\s+control",
+            "label": "Artifact count",
+            "category": "Spellslinger"
+        },
+        {
+            "regex": "whenever\\s+you\\s+cast\\s+an?\\s+artifact",
+            "label": "Artifact cast trigger",
+            "category": "Artifacts matter"
+        },
+        {
+            "regex": "(metalcraft|improvise)",
+            "label": "Metalcraft/Improvise",
+            "category": "Artifacts matter"
+        },
+        {
+            "regex": "(whenever\\s+a\\s+land\\s+enters|landfall)",
+            "label": "Landfall",
+            "category": "Artifacts matter"
+        },
+        {
+            "regex": "(play\\s+an?\\s+additional\\s+land|additional\\s+land)",
+            "label": "Extra land drop",
+            "category": "Artifacts matter"
+        },
+        {
+            "regex": "(land[s]?\\s+you\\s+control|number\\s+of\\s+lands?\\s+you\\s+control)",
+            "label": "Land count matters",
+            "category": "Lands matter"
+        },
+        {
+            "regex": "(sacrifice\\s+a\\s+land|sacrifices?\\s+.*?land)",
+            "label": "Land sacrifice",
+            "category": "Lands matter"
+        },
+        {
+            "regex": "(play\\s+land[s]?\\s+from\\s+your\\s+graveyard)",
+            "label": "Crucible effect",
+            "category": "Lands matter"
+        },
+        {
+            "regex": "(extra\\s+turn|additional\\s+turn)",
+            "label": "Extra turns",
+            "category": "Lands matter"
+        },
+        {
+            "regex": "(planeswalker)",
+            "label": "Planeswalker matters",
+            "category": "Lands matter"
+        },
+        {
+            "regex": "(loyalty\\s+counter|loyalty\\s+abilit)",
+            "label": "Loyalty",
+            "category": "Extra turns"
+        },
+        {
+            "regex": "(vote|voting|council\\'s\\s+dilemma|will\\s+of\\s+the\\s+council)",
+            "label": "Voting",
+            "category": "Planeswalker"
+        },
+        {
+            "regex": "(monarch|the\\s+monarch)",
+            "label": "Monarch",
+            "category": "Planeswalker"
+        },
+        {
+            "regex": "(the\\s+initiative|initiative)",
+            "label": "Initiative",
+            "category": "Voting & politics"
+        },
+        {
+            "regex": "(flash)",
+            "label": "Flash",
+            "category": "Voting & politics"
+        },
+        {
+            "regex": "(proliferate)",
+            "label": "Proliferate",
+            "category": "Voting & politics"
+        },
+        {
+            "regex": "(cascade)",
+            "label": "Cascade",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(commander)",
+            "label": "Commander matters",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(transform|transforms|transformed)",
+            "label": "Transform",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(venture\\s+into\\s+the\\s+dungeon|completed?\\s+a\\s+dungeon)",
+            "label": "Dungeon",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(infect|poison\\s+counter|toxic)",
+            "label": "Poison",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(corrupted)",
+            "label": "Corrupted",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(energy\\s+counter|\\{e\\})",
+            "label": "Energy",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(experience\\s+counter)",
+            "label": "Experience",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(partner|choose\\s+a\\s+background)",
+            "label": "Partner",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(ward\\s)",
+            "label": "Ward",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(connive)",
+            "label": "Connive",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(investigate)",
+            "label": "Investigate",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(discover\\s+\\d+)",
+            "label": "Discover",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(manifest|manifest\\s+dread)",
+            "label": "Manifest",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(morph|megamorph|face\\s+down)",
+            "label": "Morph",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(foretell)",
+            "label": "Foretell",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(suspend)",
+            "label": "Suspend",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(phase[s]?\\s+out|phasing)",
+            "label": "Phasing",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(ninjutsu)",
+            "label": "Ninjutsu",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(encore|myriad)",
+            "label": "Multi-copy attack",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(affinity)",
+            "label": "Affinity",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(convoke)",
+            "label": "Convoke",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(crew\\s+\\d+)",
+            "label": "Vehicle",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(mutate)",
+            "label": "Mutate",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(adapt\\s+\\d+|evolve)",
+            "label": "Adapt/Evolve",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(enrage)",
+            "label": "Enrage",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(incubat)",
+            "label": "Incubate",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(amass\\s)",
+            "label": "Amass",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "discard[s]?\\s+(your|their)\\s+hand.*?draw",
+            "label": "Wheel",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "whenever.*?(draws?\\s+a\\s+card).*?(damage|lose)",
+            "label": "Wheel punishment",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(can\\'t\\s+attack\\s+you|attacks?\\s+you.*?pay)",
+            "label": "Pillowfort",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(cost[s]?\\s+.*?more\\s+to\\s+cast|spells?\\s+cost\\s+.*?more)",
+            "label": "Tax effect",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(can\\'t\\s+cast\\s+more\\s+than\\s+one|only\\s+cast\\s+.*?each\\s+turn)",
+            "label": "Casting restriction",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(flip\\s+a\\s+coin|coin\\s+flip)",
+            "label": "Coin flip",
+            "category": "Miscellaneous archetypes"
+        },
+        {
+            "regex": "(roll\\s+.*?d(4|6|8|10|12|20)|roll\\s+a\\s+.*?die)",
+            "label": "Dice rolling",
+            "category": "Miscellaneous archetypes"
+        }
+    ],
+    "exclude_types": {
+        "Mana production": [
+            "Land"
+        ],
+        "Mana fixing": [
+            "Land"
+        ]
+    }
+}

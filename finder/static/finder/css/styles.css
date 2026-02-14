@@ -940,6 +940,12 @@ a.card-item {
     color: var(--text-muted);
 }
 
+.db-management-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0;
+}
+
 @media (max-width: 900px) {
     .index-layout {
         flex-direction: column;
