@@ -9,15 +9,16 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 **Three-step flow:**
 
 1. **Paste your decklist** — supports common formats (`1 Card Name`, `1x Card Name`), section headers (Commander, Sideboard, etc.), and 100-card singleton decks
-2. **Review extracted themes** — the app analyzes your deck and extracts themes across four categories (subtypes, keywords, card types, oracle text patterns), organized into tiers by frequency
+2. **Review extracted themes** — the app analyzes your deck and extracts themes across six categories (subtypes, keywords, card types, supertypes, oracle text patterns, stat profiles), organized into tiers by frequency
 3. **Browse matching cards** — see cards from the target sets that match your selected themes, filtered by format legality and color identity, with Scryfall card images. Cards already in your deck are automatically excluded.
 
 ## Features
 
-- **161 oracle text patterns** covering archetypes like tokens, sacrifice, blink, copy, ramp, aristocrats, spellslinger, landfall, untap, enchantress, artifacts matter, wheels, pillowfort, and more
+- **163 oracle text patterns** covering archetypes like tokens, sacrifice, blink, copy, ramp, aristocrats, spellslinger, landfall, untap, enchantress, artifacts matter, wheels, pillowfort, power/toughness matters, and more
 - **14 format filters** — Commander, Standard, Modern, Pioneer, Legacy, Vintage, Pauper, Oathbreaker, and others
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
+- **Combined & category views** — analysis page defaults to a unified tier list across all categories; toggle to per-category view
 - **3-step card name lookup** — exact name, then front face name (for DFCs/adventures like Bonecrusher Giant), then prefix match
 - **Dedicated land discovery** — "Include All Lands" toggle finds non-basic lands using intersection-based color identity (lands sharing at least one color with your deck), separate from theme analysis
 - **Deck card exclusion** — cards already in your decklist are filtered out of results
@@ -97,7 +98,7 @@ docker restart gather-them
 gather_them/          Django project settings and URL config
 finder/
   data/
-    oracle_patterns.json  161 regex patterns for oracle text theme detection (editable config)
+    oracle_patterns.json  163 regex patterns for oracle text theme detection (editable config)
   services/
     card_lookup.py    SQLite queries (card lookup, set listing, set card retrieval)
     db_updater.py     MTGJSON database download and atomic replacement

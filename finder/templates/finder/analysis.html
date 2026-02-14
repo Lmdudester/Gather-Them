@@ -1,4 +1,5 @@
 {% extends "finder/base.html" %}
+{% load card_extras %}
 {% block title %}Deck Analysis - Gather Them{% endblock %}
 
 {% block content %}
@@ -47,6 +48,7 @@
         <div class="select-controls">
             <button type="button" class="btn btn-small" onclick="toggleAll(true)">Select All</button>
             <button type="button" class="btn btn-small" onclick="toggleAll(false)">Deselect All</button>
+            <button type="button" class="btn btn-small" id="view-toggle">By Category</button>
             <label class="lands-toggle">
                 <input type="checkbox" name="include_lands" value="1" checked>
                 <span class="lands-toggle-label">Include All Lands</span>
@@ -54,35 +56,103 @@
             <button type="submit" class="btn btn-primary">Find Matching Cards</button>
         </div>
 
-        {% for category, tiers in tiered_themes.items %}
-        {% if tiers %}
-        <div class="theme-category">
-            <h2>{{ category }}s</h2>
-            <div class="tier-columns">
-                {% for label, tier_index, items in tiers %}
-                <div class="tier-column">
-                    <div class="tier-header tier-{{ tier_index }}">{{ label }}</div>
-                    {% for name, count in items %}
-                    <label class="theme-checkbox">
-                        <input type="checkbox" name="tags" value="{{ category }}:{{ name }}" {% if tier_index == 1 %}checked{% endif %}>
-                        <span class="theme-label">{{ name }}</span>
-                        <span class="theme-count">{{ count }}</span>
-                    </label>
+        {# === Combined view (default) === #}
+        <div id="combined-view">
+            <div class="theme-category">
+                <div class="tier-columns">
+                    {% for label, tier_index, items in merged_tiers %}
+                    <div class="tier-column">
+                        <div class="tier-header tier-{{ tier_index }}">{{ label }}</div>
+                        {% for tag, count in items %}
+                        <label class="theme-checkbox theme-checkbox-combined">
+                            <input type="checkbox" name="tags" value="{{ tag }}" {% if tier_index == 1 %}checked{% endif %}>
+                            <span class="theme-label">{{ tag|tag_display }}</span>
+                            <span class="theme-count">{{ count }}</span>
+                            <span class="flex-break"></span>
+                            <span class="theme-category-badge">{{ tag|tag_category }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
                     {% endfor %}
                 </div>
-                {% endfor %}
             </div>
         </div>
-        {% endif %}
-        {% endfor %}
+
+        {# === Category view (hidden by default) === #}
+        <div id="category-view" style="display: none;">
+            {% for category, tiers in tiered_themes.items %}
+            {% if tiers %}
+            <div class="theme-category">
+                <h2>{{ category }}s</h2>
+                <div class="tier-columns">
+                    {% for label, tier_index, items in tiers %}
+                    <div class="tier-column">
+                        <div class="tier-header tier-{{ tier_index }}">{{ label }}</div>
+                        {% for name, count in items %}
+                        <label class="theme-checkbox">
+                            <input type="checkbox" value="{{ category }}:{{ name }}" {% if tier_index == 1 %}checked{% endif %}>
+                            <span class="theme-label">{{ name }}</span>
+                            <span class="theme-count">{{ count }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
     </form>
 </div>
 
 <script>
 function toggleAll(checked) {
-    document.querySelectorAll('.theme-form input[type="checkbox"]').forEach(cb => {
+    const active = document.querySelector('#combined-view').style.display !== 'none'
+        ? '#combined-view' : '#category-view';
+    document.querySelectorAll(active + ' input[type="checkbox"]').forEach(cb => {
         cb.checked = checked;
     });
+    syncCheckedState(active === '#combined-view' ? 'combined' : 'category');
 }
+
+function syncCheckedState(source) {
+    const combined = document.getElementById('combined-view');
+    const category = document.getElementById('category-view');
+    const fromContainer = source === 'combined' ? combined : category;
+    const toContainer = source === 'combined' ? category : combined;
+
+    const checkedValues = new Set();
+    fromContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        if (cb.checked) checkedValues.add(cb.value);
+    });
+    toContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = checkedValues.has(cb.value);
+    });
+}
+
+document.getElementById('view-toggle').addEventListener('click', function() {
+    const combined = document.getElementById('combined-view');
+    const category = document.getElementById('category-view');
+    const showingCombined = combined.style.display !== 'none';
+
+    if (showingCombined) {
+        // Switching to category view — sync from combined
+        syncCheckedState('combined');
+        combined.style.display = 'none';
+        category.style.display = '';
+        // Remove name from hidden view, add to visible
+        combined.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.removeAttribute('name'));
+        category.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.setAttribute('name', 'tags'));
+        this.textContent = 'Combined';
+    } else {
+        // Switching to combined view — sync from category
+        syncCheckedState('category');
+        category.style.display = 'none';
+        combined.style.display = '';
+        category.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.removeAttribute('name'));
+        combined.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.setAttribute('name', 'tags'));
+        this.textContent = 'By Category';
+    }
+});
 </script>
 {% endblock %}

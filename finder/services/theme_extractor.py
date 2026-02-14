@@ -13,6 +13,9 @@ _SKIP_KEYWORDS = {
 # Basic land subtypes — too common to be useful as deck themes
 _SKIP_SUBTYPES = {'Plains', 'Island', 'Swamp', 'Mountain', 'Forest'}
 
+# Supertypes that aren't thematically useful for deck-building discovery
+_SKIP_SUPERTYPES = {'Basic', 'World', 'Host', 'Ongoing'}
+
 
 def extract_themes(cards_with_qty):
     """Extract and rank themes from a deck's cards.
@@ -29,6 +32,8 @@ def extract_themes(cards_with_qty):
     keyword_counts = Counter()
     card_type_counts = Counter()
     oracle_counts = Counter()
+    supertype_counts = Counter()
+    stats_counts = Counter()
     color_identity = set()
 
     total_cards = sum(qty for qty, _ in cards_with_qty)
@@ -51,6 +56,29 @@ def extract_themes(cards_with_qty):
         for ct in card.get('types', []):
             if ct != 'Land':
                 card_type_counts[ct] += qty
+
+        # Supertypes (skip non-thematic ones)
+        for st in card.get('supertypes', []):
+            if st not in _SKIP_SUPERTYPES:
+                supertype_counts[st] += qty
+
+        # Stats-based themes (P/T profiles for creatures)
+        power_raw = card.get('power')
+        toughness_raw = card.get('toughness')
+        if power_raw is not None and toughness_raw is not None:
+            try:
+                power = int(float(power_raw))
+                toughness = int(float(toughness_raw))
+                if power >= 4:
+                    stats_counts['High Power'] += qty
+                if toughness >= 4:
+                    stats_counts['High Toughness'] += qty
+                if toughness >= power + 3:
+                    stats_counts['Toughness > Power'] += qty
+                if power <= 2:
+                    stats_counts['Low Power'] += qty
+            except (ValueError, TypeError):
+                pass  # Skip creatures with non-numeric P/T (e.g., */*)
 
         # Color identity
         for c in card.get('colorIdentity', []):
@@ -81,6 +109,8 @@ def extract_themes(cards_with_qty):
         'Subtype': _filter_and_sort(subtype_counts),
         'Keyword': _filter_and_sort(keyword_counts),
         'Card Type': _filter_and_sort(card_type_counts),
+        'Supertype': _filter_and_sort(supertype_counts),
         'Oracle Pattern': _filter_and_sort(oracle_counts),
+        'Stat Profile': _filter_and_sort(stats_counts),
         'color_identity': sorted(color_identity),
     }

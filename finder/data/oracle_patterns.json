@@ -771,6 +771,16 @@
             "category": "Miscellaneous archetypes"
         },
         {
+            "regex": "(damage equal to.{0,20}toughness|toughness \\d+ or (greater|more|less)|total toughness|with toughness \\d)",
+            "label": "Toughness matters",
+            "category": "Power/Toughness"
+        },
+        {
+            "regex": "(power \\d+ or (greater|more|less)|total power|greatest power|with power \\d)",
+            "label": "Power matters",
+            "category": "Power/Toughness"
+        },
+        {
             "regex": "discard[s]?\\s+(your|their)\\s+hand.*?draw",
             "label": "Wheel",
             "category": "Miscellaneous archetypes"

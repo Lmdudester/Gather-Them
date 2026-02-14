@@ -34,3 +34,9 @@ def scryfall_page_url(card):
 def tag_display(value):
     """Strip category prefix from tag for display: 'Subtype:Goblin' -> 'Goblin'."""
     return value.split(':', 1)[1] if ':' in value else value
+
+
+@register.filter
+def tag_category(value):
+    """Extract category prefix: 'Subtype:Goblin' -> 'Subtype'."""
+    return value.split(':', 1)[0] if ':' in value else value

@@ -89,6 +89,36 @@
             </div>
             {% endif %}
 
+            {% if filter_powers %}
+            <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="power">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
+                <span class="filter-section-label">Power</span>
+                <div class="filter-options">
+                    {% for p in filter_powers %}
+                    <button type="button" class="filter-btn" data-category="power" data-value="{{ p }}">{{ p }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if filter_toughnesses %}
+            <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="toughness">
+                    <input type="checkbox">
+                    <span class="filter-mode-label">OR</span>
+                </label>
+                <span class="filter-section-label">Toughness</span>
+                <div class="filter-options">
+                    {% for t in filter_toughnesses %}
+                    <button type="button" class="filter-btn" data-category="toughness" data-value="{{ t }}">{{ t }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% if filter_tags_grouped %}
             <div class="filter-section filter-section-grouped">
                 <label class="filter-mode-toggle" data-category="tags">
@@ -122,6 +152,8 @@
            data-types="{{ card.types|join:',' }}"
            data-rarity="{{ card.rarity|default:''|lower }}"
            data-mv="{{ card.mv_display }}"
+           data-power="{{ card.power_display }}"
+           data-toughness="{{ card.toughness_display }}"
            data-tags="{{ matched_tags|join:',' }}">
             <div class="card-image-wrapper">
                 <img
@@ -233,7 +265,7 @@
         });
     });
 
-    const categoryLabels = {types: 'Type', rarity: 'Rarity', mv: 'Mana Value', tags: 'Matched Tags'};
+    const categoryLabels = {types: 'Type', rarity: 'Rarity', mv: 'Mana Value', power: 'Power', toughness: 'Toughness', tags: 'Matched Tags'};
 
     function updateActiveSummary() {
         activeSummary.innerHTML = '';
@@ -289,6 +321,18 @@
                         categoryMatch = [...values].every(v => v === item.dataset.mv);
                     } else {
                         categoryMatch = values.has(item.dataset.mv);
+                    }
+                } else if (category === 'power') {
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => v === item.dataset.power);
+                    } else {
+                        categoryMatch = values.has(item.dataset.power);
+                    }
+                } else if (category === 'toughness') {
+                    if (isAnd) {
+                        categoryMatch = [...values].every(v => v === item.dataset.toughness);
+                    } else {
+                        categoryMatch = values.has(item.dataset.toughness);
                     }
                 } else if (category === 'tags') {
                     const itemTags = item.dataset.tags.split(',').filter(Boolean);

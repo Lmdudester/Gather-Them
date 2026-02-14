@@ -168,7 +168,7 @@ def _aggregate_multi_face(cards_by_name):
         # Merge faces
         merged = dict(entries[0][1])
         for _, face in entries[1:]:
-            for field in ('subtypes', 'keywords', 'types'):
+            for field in ('subtypes', 'keywords', 'types', 'supertypes'):
                 merged[field] = list(set(merged[field]) | set(face.get(field, [])))
             if face.get('text'):
                 merged['text'] = (merged.get('text') or '') + '\n// \n' + face['text']

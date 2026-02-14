@@ -183,10 +183,19 @@ def analyze(request):
     for category, theme_list in themes.items():
         tiered_themes[category] = _tier_themes(theme_list)
 
+    # Merge all themes into a single list for the combined view
+    merged_themes = []
+    for category, theme_list in themes.items():
+        for name, count in theme_list:
+            merged_themes.append((f'{category}:{name}', count))
+    merged_themes.sort(key=lambda x: (-x[1], x[0]))
+    merged_tiers = _tier_themes(merged_themes)
+
     deck_card_names = [card['name'] for card in found_cards.values()]
 
     context = {
         'tiered_themes': tiered_themes,
+        'merged_tiers': merged_tiers,
         'set_codes_json': json.dumps(set_codes),
         'set_displays': set_displays,
         'format_name': format_name,
@@ -294,6 +303,8 @@ def results(request):
     filter_types_set = set()
     filter_rarities_set = set()
     filter_mv_set = set()
+    filter_power_set = set()
+    filter_toughness_set = set()
     filter_tags_by_category = {}
     for card, matched_tags, _ in matched_results:
         for t in card.get('types', []):
@@ -305,6 +316,30 @@ def results(request):
         mv_display = '7+' if mv_raw >= 7 else str(mv_raw)
         card['mv_display'] = mv_display
         filter_mv_set.add(mv_display)
+
+        # Power/Toughness bucketing
+        power_raw = card.get('power')
+        toughness_raw = card.get('toughness')
+        if power_raw is not None:
+            try:
+                p = int(float(power_raw))
+                card['power_display'] = '7+' if p >= 7 else str(p)
+            except (ValueError, TypeError):
+                card['power_display'] = '*'
+            filter_power_set.add(card['power_display'])
+        else:
+            card['power_display'] = ''
+
+        if toughness_raw is not None:
+            try:
+                t_val = int(float(toughness_raw))
+                card['toughness_display'] = '7+' if t_val >= 7 else str(t_val)
+            except (ValueError, TypeError):
+                card['toughness_display'] = '*'
+            filter_toughness_set.add(card['toughness_display'])
+        else:
+            card['toughness_display'] = ''
+
         for tag in matched_tags:
             category = tag.split(':', 1)[0] if ':' in tag else 'Other'
             filter_tags_by_category.setdefault(category, set()).add(tag)
@@ -313,11 +348,20 @@ def results(request):
     filter_rarities = [r for r in rarity_order if r in filter_rarities_set]
     # Sort MV values: numeric first, then 7+
     filter_mvs = sorted(filter_mv_set, key=lambda x: (x == '7+', int(x.rstrip('+'))))
+    # Sort P/T values: * first, then numeric, then 7+
+    def _pt_sort_key(x):
+        if x == '*':
+            return (0, 0)
+        if x == '7+':
+            return (2, 7)
+        return (1, int(x))
+    filter_powers = sorted(filter_power_set, key=_pt_sort_key)
+    filter_toughnesses = sorted(filter_toughness_set, key=_pt_sort_key)
 
     # Group tags by category in a stable order, skipping categories
     # that already have their own dedicated filter section
     skip_categories = {'Card Type'}  # covered by the Type filter
-    category_order = ['Subtype', 'Keyword', 'Oracle Pattern']
+    category_order = ['Subtype', 'Keyword', 'Supertype', 'Oracle Pattern', 'Stat Profile']
     filter_tags_grouped = []
     for cat in category_order:
         if cat in filter_tags_by_category:
@@ -353,6 +397,8 @@ def results(request):
         'filter_types': filter_types,
         'filter_rarities': filter_rarities,
         'filter_mvs': filter_mvs,
+        'filter_powers': filter_powers,
+        'filter_toughnesses': filter_toughnesses,
         'filter_tags_grouped': filter_tags_grouped,
     }
     return render(request, 'finder/results.html', context)
