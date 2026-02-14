@@ -40,14 +40,19 @@ def get_sets_for_dropdown():
 
 
 def _parse_json_col(value):
-    """Parse a JSON array stored as TEXT, returning a list."""
+    """Parse a list column stored as TEXT, returning a list.
+
+    MTGJSON stores these as comma-separated strings (e.g. 'Kor, Cleric')
+    but older versions used JSON arrays. Handle both formats.
+    """
     if not value:
         return []
     try:
         result = json.loads(value)
         return result if isinstance(result, list) else []
     except (json.JSONDecodeError, TypeError):
-        return []
+        # Comma-separated string format
+        return [item.strip() for item in value.split(',') if item.strip()]
 
 
 def _row_to_card(row):
