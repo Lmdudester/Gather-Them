@@ -85,10 +85,11 @@ def _row_to_card(row):
 def lookup_cards(card_names):
     """Look up a list of card names, returning found cards and unfound names.
 
-    Uses a 3-step fallback:
+    Uses a 4-step fallback:
     1. Exact match on `name`
     2. Match on `faceName` (for DFC/adventure front faces)
     3. LIKE prefix match
+    4. Match on `flavorName` (for Universes Beyond cards entered by UB name)
 
     Returns:
         (found_cards, unfound_names) where found_cards is a dict mapping
@@ -161,6 +162,28 @@ def lookup_cards(card_names):
                 found[name] = _row_to_card(row)
                 found[name]['scryfallId'] = row['scryfallId']
                 remaining.discard(name)
+
+        if not remaining:
+            return found, []
+
+        # Step 4: flavorName lookup (Universes Beyond cards entered by UB name)
+        placeholders = ','.join('?' for _ in remaining)
+        query = f"""
+            SELECT c.*, ci.scryfallId
+            FROM cards c
+            LEFT JOIN cardIdentifiers ci ON c.uuid = ci.uuid
+            WHERE c.flavorName IN ({placeholders})
+              AND c.language = 'English'
+        """
+        rows = conn.execute(query, list(remaining)).fetchall()
+
+        for row in rows:
+            flavor_name = row['flavorName']
+            if flavor_name in remaining and flavor_name not in found:
+                found[flavor_name] = _row_to_card(row)
+                found[flavor_name]['scryfallId'] = row['scryfallId']
+
+        remaining -= set(found.keys())
 
     return found, list(remaining)
 
