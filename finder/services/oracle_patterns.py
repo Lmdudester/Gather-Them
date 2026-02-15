@@ -14,6 +14,16 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
+# Evergreen / common keywords that form "cares about" archetypes.
+# Cards that simply HAVE the keyword don't mention it in oracle text (MTGJSON
+# stores keywords separately), so matching the keyword name in oracle text
+# specifically captures cards that grant, check for, or reward the keyword.
+_KEYWORD_MATTERS = [
+    'flying', 'trample', 'haste', 'vigilance', 'first strike',
+    'defender', 'menace', 'indestructible',
+    'deathtouch', 'double strike', 'lifelink',
+]
+
 _lock = threading.Lock()
 _cache = {
     'patterns': None,       # list[(compiled_regex, label)]
@@ -41,6 +51,14 @@ def _load_patterns():
         except re.error as e:
             logger.warning('Skipping invalid regex %r for label %r: %s', regex_str, label, e)
             continue
+        patterns.append((compiled, label))
+        pattern_map[label] = compiled
+
+    # Generate "keyword matters" patterns dynamically
+    for kw in _KEYWORD_MATTERS:
+        regex_str = f'({re.escape(kw)})'
+        label = f'{kw.title()} matters'
+        compiled = re.compile(regex_str)
         patterns.append((compiled, label))
         pattern_map[label] = compiled
 

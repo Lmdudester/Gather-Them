@@ -456,6 +456,16 @@
             "category": "Discard & hand disruption"
         },
         {
+            "regex": "(modified)",
+            "label": "Modified",
+            "category": "Equipment & auras"
+        },
+        {
+            "regex": "enchanted\\s+or\\s+equipped",
+            "label": "Voltron payoff",
+            "category": "Equipment & auras"
+        },
+        {
             "regex": "(reconfigure)",
             "label": "Reconfigure",
             "category": "Equipment & auras"
