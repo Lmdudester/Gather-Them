@@ -49,6 +49,14 @@
             <button type="button" class="btn btn-small" onclick="toggleAll(true)">Select All</button>
             <button type="button" class="btn btn-small" onclick="toggleAll(false)">Deselect All</button>
             <button type="button" class="btn btn-small" id="view-toggle">By Category</button>
+            {% if max_concept_count > 2 %}
+            <div class="relevance-filter">
+                <label class="relevance-filter-label" for="relevance-slider">Min Count</label>
+                <input type="range" id="relevance-slider" class="relevance-slider"
+                       min="2" max="{{ max_concept_count }}" value="2" step="1">
+                <span class="relevance-value" id="relevance-value">2</span>
+            </div>
+            {% endif %}
             <label class="lands-toggle">
                 <input type="checkbox" name="include_lands" value="1">
                 <span class="lands-toggle-label">Include All Lands</span>
@@ -110,51 +118,301 @@
 </div>
 
 <script>
-function toggleAll(checked) {
-    const active = document.querySelector('#combined-view').style.display !== 'none'
+// === Data extraction ===
+var allConcepts = [];
+document.querySelectorAll('#combined-view input[type="checkbox"]').forEach(function(cb) {
+    var tag = cb.value;
+    var countEl = cb.closest('.theme-checkbox').querySelector('.theme-count');
+    var count = parseInt(countEl.textContent.trim(), 10);
+    var parts = tag.split(':');
+    var category = parts[0];
+    var name = parts.slice(1).join(':');
+    allConcepts.push({ tag: tag, category: category, name: name, count: count });
+});
+
+// Track checked state — initialize from server-rendered tier-1 checks
+var userChecked = new Set();
+document.querySelectorAll('#combined-view input[type="checkbox"]:checked').forEach(function(cb) {
+    userChecked.add(cb.value);
+});
+
+// Event delegation to keep userChecked in sync with clicks
+['combined-view', 'category-view'].forEach(function(viewId) {
+    document.getElementById(viewId).addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox') {
+            if (e.target.checked) userChecked.add(e.target.value);
+            else userChecked.delete(e.target.value);
+        }
+    });
+});
+
+// === Tier algorithm (matches Python _tier_themes) ===
+var TIER_LABELS = ['Core', 'Strong', 'Moderate', 'Minor', 'Fringe'];
+var NUM_TIERS = TIER_LABELS.length;
+
+function tierThemes(items) {
+    if (items.length === 0) return [];
+    var maxCount = items[0].count;
+    var minCount = items[items.length - 1].count;
+
+    if (maxCount === minCount) {
+        return [{ label: TIER_LABELS[0], tierIndex: 1, items: items }];
+    }
+
+    var logMax = Math.log(maxCount + 1);
+    var logMin = Math.log(minCount);
+    var band = (logMax - logMin) / NUM_TIERS;
+
+    var thresholds = [];
+    for (var i = 0; i < NUM_TIERS; i++) {
+        thresholds.push(Math.exp(logMax - band * (i + 1)));
+    }
+
+    var tiers = [];
+    for (var i = 0; i < NUM_TIERS; i++) tiers.push([]);
+
+    items.forEach(function(item) {
+        var placed = false;
+        for (var i = 0; i < NUM_TIERS - 1; i++) {
+            if (item.count >= thresholds[i]) {
+                tiers[i].push(item);
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) tiers[NUM_TIERS - 1].push(item);
+    });
+
+    var result = [];
+    for (var i = 0; i < NUM_TIERS; i++) {
+        if (tiers[i].length > 0) {
+            result.push({ label: TIER_LABELS[i], tierIndex: i + 1, items: tiers[i] });
+        }
+    }
+    return result;
+}
+
+// === DOM rebuild functions ===
+function rebuildCombinedView(tieredData) {
+    var container = document.querySelector('#combined-view .tier-columns');
+    container.innerHTML = '';
+    var isActive = document.getElementById('combined-view').style.display !== 'none';
+
+    tieredData.forEach(function(tier) {
+        var col = document.createElement('div');
+        col.className = 'tier-column';
+
+        var header = document.createElement('div');
+        header.className = 'tier-header tier-' + tier.tierIndex;
+        header.textContent = tier.label;
+        col.appendChild(header);
+
+        tier.items.forEach(function(item) {
+            var label = document.createElement('label');
+            label.className = 'theme-checkbox theme-checkbox-combined';
+
+            var cb = document.createElement('input');
+            cb.type = 'checkbox';
+            if (isActive) cb.name = 'tags';
+            cb.value = item.tag;
+            cb.checked = userChecked.has(item.tag);
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'theme-label';
+            nameSpan.textContent = item.name;
+
+            var countSpan = document.createElement('span');
+            countSpan.className = 'theme-count';
+            countSpan.textContent = item.count;
+
+            var flexBreak = document.createElement('span');
+            flexBreak.className = 'flex-break';
+
+            var badge = document.createElement('span');
+            badge.className = 'theme-category-badge';
+            badge.textContent = item.category;
+
+            label.appendChild(cb);
+            label.appendChild(nameSpan);
+            label.appendChild(countSpan);
+            label.appendChild(flexBreak);
+            label.appendChild(badge);
+            col.appendChild(label);
+        });
+
+        container.appendChild(col);
+    });
+}
+
+function rebuildCategoryView(filteredConcepts) {
+    var container = document.getElementById('category-view');
+    container.innerHTML = '';
+    var isActive = container.style.display !== 'none';
+
+    var byCategory = {};
+    filteredConcepts.forEach(function(item) {
+        if (!byCategory[item.category]) byCategory[item.category] = [];
+        byCategory[item.category].push(item);
+    });
+
+    Object.keys(byCategory).sort().forEach(function(category) {
+        var items = byCategory[category].sort(function(a, b) {
+            return b.count - a.count || a.name.localeCompare(b.name);
+        });
+
+        var tiers = tierThemes(items);
+        if (tiers.length === 0) return;
+
+        var section = document.createElement('div');
+        section.className = 'theme-category';
+
+        var h2 = document.createElement('h2');
+        h2.textContent = category + 's';
+        section.appendChild(h2);
+
+        var tierCols = document.createElement('div');
+        tierCols.className = 'tier-columns';
+
+        tiers.forEach(function(tier) {
+            var col = document.createElement('div');
+            col.className = 'tier-column';
+
+            var header = document.createElement('div');
+            header.className = 'tier-header tier-' + tier.tierIndex;
+            header.textContent = tier.label;
+            col.appendChild(header);
+
+            tier.items.forEach(function(item) {
+                var label = document.createElement('label');
+                label.className = 'theme-checkbox';
+
+                var cb = document.createElement('input');
+                cb.type = 'checkbox';
+                if (isActive) cb.name = 'tags';
+                cb.value = item.tag;
+                cb.checked = userChecked.has(item.tag);
+
+                var nameSpan = document.createElement('span');
+                nameSpan.className = 'theme-label';
+                nameSpan.textContent = item.name;
+
+                var countSpan = document.createElement('span');
+                countSpan.className = 'theme-count';
+                countSpan.textContent = item.count;
+
+                label.appendChild(cb);
+                label.appendChild(nameSpan);
+                label.appendChild(countSpan);
+                col.appendChild(label);
+            });
+
+            tierCols.appendChild(col);
+        });
+
+        section.appendChild(tierCols);
+        container.appendChild(section);
+    });
+}
+
+// === Relevance filter ===
+function captureCheckedState() {
+    var activeView = document.getElementById('combined-view').style.display !== 'none'
         ? '#combined-view' : '#category-view';
-    document.querySelectorAll(active + ' input[type="checkbox"]').forEach(cb => {
+    document.querySelectorAll(activeView + ' input[type="checkbox"]').forEach(function(cb) {
+        if (cb.checked) userChecked.add(cb.value);
+        else userChecked.delete(cb.value);
+    });
+}
+
+function applyRelevanceFilter(threshold) {
+    captureCheckedState();
+
+    var filtered = allConcepts.filter(function(item) {
+        return item.count >= threshold;
+    });
+
+    // Remove checked state for filtered-out concepts
+    var visibleTags = new Set(filtered.map(function(item) { return item.tag; }));
+    userChecked.forEach(function(tag) {
+        if (!visibleTags.has(tag)) userChecked.delete(tag);
+    });
+
+    // Sort for combined view
+    var sorted = filtered.slice().sort(function(a, b) {
+        return b.count - a.count || a.tag.localeCompare(b.tag);
+    });
+
+    rebuildCombinedView(tierThemes(sorted));
+    rebuildCategoryView(filtered);
+
+    // Empty state message
+    var msg = document.getElementById('no-concepts-msg');
+    if (filtered.length === 0) {
+        if (!msg) {
+            msg = document.createElement('p');
+            msg.id = 'no-concepts-msg';
+            msg.className = 'instructions';
+            msg.textContent = 'No concepts meet this threshold. Lower the minimum count.';
+            var combinedView = document.getElementById('combined-view');
+            combinedView.parentNode.insertBefore(msg, combinedView);
+        }
+    } else if (msg) {
+        msg.remove();
+    }
+}
+
+var slider = document.getElementById('relevance-slider');
+var valueDisplay = document.getElementById('relevance-value');
+if (slider) {
+    slider.addEventListener('input', function() {
+        valueDisplay.textContent = this.value;
+        applyRelevanceFilter(parseInt(this.value, 10));
+    });
+}
+
+// === Toggle all / sync / view toggle ===
+function toggleAll(checked) {
+    var active = document.getElementById('combined-view').style.display !== 'none'
+        ? '#combined-view' : '#category-view';
+    document.querySelectorAll(active + ' input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = checked;
+        if (checked) userChecked.add(cb.value);
+        else userChecked.delete(cb.value);
+    });
+    // Sync the other view
+    var other = active === '#combined-view' ? '#category-view' : '#combined-view';
+    document.querySelectorAll(other + ' input[type="checkbox"]').forEach(function(cb) {
         cb.checked = checked;
     });
-    syncCheckedState(active === '#combined-view' ? 'combined' : 'category');
 }
 
 function syncCheckedState(source) {
-    const combined = document.getElementById('combined-view');
-    const category = document.getElementById('category-view');
-    const fromContainer = source === 'combined' ? combined : category;
-    const toContainer = source === 'combined' ? category : combined;
-
-    const checkedValues = new Set();
-    fromContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if (cb.checked) checkedValues.add(cb.value);
-    });
-    toContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        cb.checked = checkedValues.has(cb.value);
+    captureCheckedState();
+    var targetId = source === 'combined' ? '#category-view' : '#combined-view';
+    document.querySelectorAll(targetId + ' input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = userChecked.has(cb.value);
     });
 }
 
 document.getElementById('view-toggle').addEventListener('click', function() {
-    const combined = document.getElementById('combined-view');
-    const category = document.getElementById('category-view');
-    const showingCombined = combined.style.display !== 'none';
+    captureCheckedState();
+    var combined = document.getElementById('combined-view');
+    var category = document.getElementById('category-view');
+    var showingCombined = combined.style.display !== 'none';
 
     if (showingCombined) {
-        // Switching to category view — sync from combined
         syncCheckedState('combined');
         combined.style.display = 'none';
         category.style.display = '';
-        // Remove name from hidden view, add to visible
-        combined.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.removeAttribute('name'));
-        category.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.setAttribute('name', 'tags'));
+        combined.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.removeAttribute('name'); });
+        category.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.setAttribute('name', 'tags'); });
         this.textContent = 'Combined';
     } else {
-        // Switching to combined view — sync from category
         syncCheckedState('category');
         category.style.display = 'none';
         combined.style.display = '';
-        category.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.removeAttribute('name'));
-        combined.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.setAttribute('name', 'tags'));
+        category.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.removeAttribute('name'); });
+        combined.querySelectorAll('input[type="checkbox"]').forEach(function(cb) { cb.setAttribute('name', 'tags'); });
         this.textContent = 'By Category';
     }
 });

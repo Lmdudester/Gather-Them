@@ -201,12 +201,14 @@ def analyze(request):
             merged_themes.append((f'{category}:{name}', count))
     merged_themes.sort(key=lambda x: (-x[1], x[0]))
     merged_tiers = _tier_themes(merged_themes)
+    max_concept_count = merged_themes[0][1] if merged_themes else 2
 
     deck_card_names = [card['name'] for card in found_cards.values()]
 
     context = {
         'tiered_themes': tiered_themes,
         'merged_tiers': merged_tiers,
+        'max_concept_count': max_concept_count,
         'set_codes_json': json.dumps(set_codes),
         'set_displays': set_displays,
         'format_name': format_name,
