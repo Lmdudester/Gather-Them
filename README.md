@@ -19,13 +19,17 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
 - **Combined & category views** — analysis page defaults to a unified tier list across all categories; toggle to per-category view
+- **Results page filtering** — filter matched cards in real time by Type, Rarity, Mana Value, Power, Toughness, or Matched Tags, with per-category AND/OR toggles and a live "X / Y cards visible" counter
+- **Scryfall card images & links** — results display card art from Scryfall's CDN, with each card linking directly to its Scryfall page
 - **3-step card name lookup** — exact name, then front face name (for DFCs/adventures like Bonecrusher Giant), then prefix match
 - **Dedicated land discovery** — "Include All Lands" toggle finds non-basic lands using intersection-based color identity (lands sharing at least one color with your deck), separate from theme analysis
 - **Deck card exclusion** — cards already in your decklist are filtered out of results
 - **Multi-set search** — select multiple target sets via a searchable picker
-- **272 playable sets** sorted by release date
+- **Playable sets only** — filters to expansions, core sets, commander products, masters sets, and similar, sorted by release date
 - **One-click database update** — download the latest MTGJSON data from within the app, with a maintenance page shown during the update
 - **Hot-reloadable oracle patterns** — patterns are stored in a JSON config file (`finder/data/oracle_patterns.json`) and can be reloaded at runtime via a button on the homepage, no server restart needed
+- **Loading transitions** — page transitions show a pulsing logo overlay with random card flavor text pulled from the database
+- **Mobile friendly** — responsive layout adapts to phone and tablet screens
 
 ## Requirements
 
@@ -114,6 +118,8 @@ finder/
   middleware.py       Maintenance mode middleware for database updates
   forms.py            Decklist form with set and format dropdowns
   views.py            Views: index, analyze, results, update_db, refresh_patterns, random_flavor
+scripts/
+  entrypoint-autoupdate.sh  Docker entrypoint: clones latest code, installs deps, runs server
 ```
 
 ## Data Sources
