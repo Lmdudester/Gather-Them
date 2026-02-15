@@ -34,6 +34,9 @@
                     <div class="set-chips"></div>
                     {{ form.set_code }}
                     <p class="field-hint">Type to search, click to add.</p>
+                    <div class="field-errors" id="set-code-error" style="display:none">
+                        <p>Please select at least one target set.</p>
+                    </div>
                     {% if form.set_code.errors %}
                     <div class="field-errors">
                         {% for error in form.set_code.errors %}
@@ -86,6 +89,7 @@
 <script>
 (function() {
     const hiddenSelect = document.getElementById('id_set_code');
+    hiddenSelect.removeAttribute('required');  // validation handled in JS
     const searchInput = document.querySelector('.set-search');
     const dropdown = document.querySelector('.set-dropdown');
     const chipsContainer = document.querySelector('.set-chips');
@@ -138,6 +142,7 @@
         dropdown.classList.remove('open');
         dropdown.innerHTML = '';
         renderChips();
+        document.getElementById('set-code-error').style.display = 'none';
     }
 
     function deselectSet(value) {
@@ -186,6 +191,14 @@
     form.addEventListener('submit', function (e) {
         if (submitting) return;   // allow the real submit to go through
         e.preventDefault();
+
+        // Validate that at least one set is selected
+        var hiddenSelect = document.getElementById('id_set_code');
+        var setError = document.getElementById('set-code-error');
+        if (hiddenSelect.selectedOptions.length === 0) {
+            setError.style.display = '';
+            return;
+        }
 
         var overlay = document.getElementById('loading-overlay');
         overlay.classList.add('active');

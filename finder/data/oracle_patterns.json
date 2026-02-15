@@ -111,16 +111,6 @@
             "category": "Card draw & selection"
         },
         {
-            "regex": "(cycling|cycle\\s+)",
-            "label": "Cycling",
-            "category": "Card draw & selection"
-        },
-        {
-            "regex": "(prowess)",
-            "label": "Prowess",
-            "category": "Card draw & selection"
-        },
-        {
             "regex": "destroy\\s+(target|all|each)",
             "label": "Destroy",
             "category": "Removal"
@@ -261,11 +251,6 @@
             "category": "Life"
         },
         {
-            "regex": "(lifelink)",
-            "label": "Lifelink",
-            "category": "Life"
-        },
-        {
             "regex": "(whenever|when)\\s+.*?\\s+attacks",
             "label": "Attack trigger",
             "category": "Life"
@@ -286,18 +271,8 @@
             "category": "Combat"
         },
         {
-            "regex": "(double\\s+strike)",
-            "label": "Double strike",
-            "category": "Combat"
-        },
-        {
             "regex": "(whenever|when)\\s+.*?\\s+blocks",
             "label": "Block trigger",
-            "category": "Combat"
-        },
-        {
-            "regex": "(goad|goaded)",
-            "label": "Goad",
             "category": "Combat"
         },
         {
@@ -341,11 +316,6 @@
             "category": "Copy & clone"
         },
         {
-            "regex": "(storm)",
-            "label": "Storm",
-            "category": "Copy & clone"
-        },
-        {
             "regex": "gain\\s+control\\s+of\\s+(target|a|each)",
             "label": "Steal",
             "category": "Copy & clone"
@@ -368,11 +338,6 @@
         {
             "regex": "(hexproof|shroud|protection\\s+from|ward)",
             "label": "Protection",
-            "category": "Control & theft"
-        },
-        {
-            "regex": "(indestructible)",
-            "label": "Indestructible",
             "category": "Control & theft"
         },
         {
@@ -526,11 +491,6 @@
             "category": "Enchantress / constellation"
         },
         {
-            "regex": "(changeling)",
-            "label": "Changeling",
-            "category": "Tribal / type matters"
-        },
-        {
             "regex": "(whenever|when)\\s+you\\s+cast\\s+(a|an)\\s+(instant|sorcery|noncreature)",
             "label": "Spellcast trigger",
             "category": "Tribal / type matters"
@@ -539,11 +499,6 @@
             "regex": "(instant[s]?\\s+and\\s+sorcery|sorceries?\\s+and\\s+instants?)\\s+(card|in\\s+your\\s+graveyard)",
             "label": "Spell graveyard",
             "category": "Tribal / type matters"
-        },
-        {
-            "regex": "(magecraft)",
-            "label": "Magecraft",
-            "category": "Spellslinger"
         },
         {
             "regex": "whenever\\s+.*?artifact\\s+enters",
@@ -621,21 +576,6 @@
             "category": "Voting & politics"
         },
         {
-            "regex": "(flash)",
-            "label": "Flash",
-            "category": "Voting & politics"
-        },
-        {
-            "regex": "(proliferate)",
-            "label": "Proliferate",
-            "category": "Voting & politics"
-        },
-        {
-            "regex": "(cascade)",
-            "label": "Cascade",
-            "category": "Miscellaneous archetypes"
-        },
-        {
             "regex": "(commander)",
             "label": "Commander matters",
             "category": "Miscellaneous archetypes"
@@ -676,21 +616,6 @@
             "category": "Miscellaneous archetypes"
         },
         {
-            "regex": "(ward\\s)",
-            "label": "Ward",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(connive)",
-            "label": "Connive",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(investigate)",
-            "label": "Investigate",
-            "category": "Miscellaneous archetypes"
-        },
-        {
             "regex": "(discover\\s+\\d+)",
             "label": "Discover",
             "category": "Miscellaneous archetypes"
@@ -706,23 +631,8 @@
             "category": "Miscellaneous archetypes"
         },
         {
-            "regex": "(foretell)",
-            "label": "Foretell",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(suspend)",
-            "label": "Suspend",
-            "category": "Miscellaneous archetypes"
-        },
-        {
             "regex": "(phase[s]?\\s+out|phasing)",
             "label": "Phasing",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(ninjutsu)",
-            "label": "Ninjutsu",
             "category": "Miscellaneous archetypes"
         },
         {
@@ -731,33 +641,13 @@
             "category": "Miscellaneous archetypes"
         },
         {
-            "regex": "(affinity)",
-            "label": "Affinity",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(convoke)",
-            "label": "Convoke",
-            "category": "Miscellaneous archetypes"
-        },
-        {
             "regex": "(crew\\s+\\d+)",
             "label": "Vehicle",
             "category": "Miscellaneous archetypes"
         },
         {
-            "regex": "(mutate)",
-            "label": "Mutate",
-            "category": "Miscellaneous archetypes"
-        },
-        {
             "regex": "(adapt\\s+\\d+|evolve)",
             "label": "Adapt/Evolve",
-            "category": "Miscellaneous archetypes"
-        },
-        {
-            "regex": "(enrage)",
-            "label": "Enrage",
             "category": "Miscellaneous archetypes"
         },
         {

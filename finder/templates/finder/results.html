@@ -27,7 +27,7 @@
         <summary>{{ selected_tags|length }} theme{{ selected_tags|length|pluralize }} selected</summary>
         <div class="tag-list">
             {% for tag in selected_tags %}
-            <span class="tag">{{ tag }}</span>
+            <span class="tag">{{ tag|tag_display }}</span>
             {% endfor %}
         </div>
     </details>
