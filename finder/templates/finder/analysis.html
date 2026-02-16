@@ -115,6 +115,7 @@
 <div class="loading-overlay" id="loading-overlay">
     <img src="{% static 'finder/img/logo.png' %}" alt="" class="loading-logo">
     <div class="loading-flavor" id="loading-flavor">Gathering cards...</div>
+    <button type="button" class="btn btn-secondary loading-cancel" id="loading-cancel">Cancel</button>
 </div>
 
 <script>
@@ -421,21 +422,31 @@ document.getElementById('view-toggle').addEventListener('click', function() {
 (function () {
     var form = document.querySelector('.theme-form');
     var submitting = false;
+    var cancelled = false;
 
     form.addEventListener('submit', function (e) {
         if (submitting) return;
         e.preventDefault();
 
+        cancelled = false;
         var overlay = document.getElementById('loading-overlay');
+        var cancelBtn = document.getElementById('loading-cancel');
         overlay.classList.add('active');
 
         var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
 
         function doSubmit() {
-            if (submitting) return;
+            if (submitting || cancelled) return;
             submitting = true;
             form.submit();
         }
+
+        function handleCancel() {
+            cancelled = true;
+            overlay.classList.remove('active');
+        }
+
+        cancelBtn.addEventListener('click', handleCancel, { once: true });
 
         var flavorDone = fetch("{% url 'finder:random_flavor' %}")
             .then(function (r) { return r.json(); })

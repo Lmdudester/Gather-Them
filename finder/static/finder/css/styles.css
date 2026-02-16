@@ -173,10 +173,22 @@ textarea:focus, select:focus {
     box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
 }
 
+textarea.invalid, select.invalid, input[type="text"].invalid {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
+    animation: shake 0.4s ease-in-out;
+}
+
 .field-errors p {
-    color: var(--accent);
+    color: var(--accent-hover);
     font-size: 0.85rem;
+    font-weight: 600;
     margin-top: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(233, 69, 96, 0.15);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    animation: shake 0.4s ease-in-out;
 }
 
 .field-hint {
@@ -1252,4 +1264,21 @@ footer {
     font-style: normal;
     font-size: 0.85em;
     color: var(--accent);
+}
+
+.loading-cancel {
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out 1s forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
