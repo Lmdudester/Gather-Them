@@ -82,6 +82,7 @@
 <div class="loading-overlay" id="loading-overlay">
     <img src="{% static 'finder/img/logo.png' %}" alt="" class="loading-logo">
     <div class="loading-flavor" id="loading-flavor">Gathering cards...</div>
+    <button type="button" class="btn btn-secondary loading-cancel" id="loading-cancel">Cancel</button>
 </div>
 {% endblock %}
 
@@ -183,10 +184,39 @@
     renderChips();
 })();
 
+// Add 'invalid' class to fields with errors
+(function() {
+    var errorDivs = document.querySelectorAll('.field-errors');
+    errorDivs.forEach(function(errorDiv) {
+        var formGroup = errorDiv.closest('.form-group');
+        if (formGroup) {
+            var inputs = formGroup.querySelectorAll('textarea, select, input[type="text"]');
+            inputs.forEach(function(input) {
+                input.classList.add('invalid');
+            });
+        }
+    });
+
+    // Remove invalid class on focus
+    document.querySelectorAll('textarea, select, input[type="text"]').forEach(function(input) {
+        input.addEventListener('focus', function() {
+            this.classList.remove('invalid');
+            var formGroup = this.closest('.form-group');
+            if (formGroup) {
+                var errorDiv = formGroup.querySelector('.field-errors');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }
+        });
+    });
+})();
+
 // Loading overlay on form submit
 (function () {
     var form = document.querySelector('.deck-form');
     var submitting = false;
+    var cancelled = false;
 
     form.addEventListener('submit', function (e) {
         if (submitting) return;   // allow the real submit to go through
@@ -200,16 +230,25 @@
             return;
         }
 
+        cancelled = false;
         var overlay = document.getElementById('loading-overlay');
+        var cancelBtn = document.getElementById('loading-cancel');
         overlay.classList.add('active');
 
         var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
 
         function doSubmit() {
-            if (submitting) return;
+            if (submitting || cancelled) return;
             submitting = true;
             form.submit();
         }
+
+        function handleCancel() {
+            cancelled = true;
+            overlay.classList.remove('active');
+        }
+
+        cancelBtn.addEventListener('click', handleCancel, { once: true });
 
         var flavorDone = fetch("{% url 'finder:random_flavor' %}")
             .then(function (r) { return r.json(); })

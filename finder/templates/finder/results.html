@@ -23,6 +23,11 @@
         </div>
     </div>
 
+    <div class="actions">
+        <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
+        <button type="button" class="btn btn-primary" onclick="backToAnalysis()">Back to Analysis</button>
+    </div>
+
     <details class="selected-tags-summary">
         <summary>{{ selected_tags|length }} theme{{ selected_tags|length|pluralize }} selected</summary>
         <div class="tag-list">
@@ -33,7 +38,7 @@
     </details>
 
     {% if results %}
-    <details class="filter-bar">
+    <details class="filter-bar"{% if total_matched > 20 %} open{% endif %}>
         <summary class="filter-bar-header">
             <div class="filter-bar-header-row">
                 <span class="filter-label">Filters</span>
@@ -181,15 +186,50 @@
         <p>Try selecting different themes or different sets.</p>
     </div>
     {% endif %}
-
-    <div class="actions">
-        <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
-    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+function backToAnalysis() {
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{% url 'finder:analyze' %}";
+
+    var csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = 'csrfmiddlewaretoken';
+    csrf.value = '{{ csrf_token }}';
+    form.appendChild(csrf);
+
+    // Reconstruct decklist from deck card names
+    var deckNames = {{ deck_card_names_json|safe }};
+    var decklist = document.createElement('input');
+    decklist.type = 'hidden';
+    decklist.name = 'decklist';
+    decklist.value = deckNames.map(function(name) { return '1 ' + name; }).join('\n');
+    form.appendChild(decklist);
+
+    // Add set codes
+    {{ set_codes_json|safe }}.forEach(function(code) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'set_code';
+        input.value = code;
+        form.appendChild(input);
+    });
+
+    // Add format
+    var format = document.createElement('input');
+    format.type = 'hidden';
+    format.name = 'format_name';
+    format.value = '{{ format_name }}';
+    form.appendChild(format);
+
+    document.body.appendChild(form);
+    form.submit();
+}
+
 (function() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const clearBtn = document.getElementById('clear-filters');
