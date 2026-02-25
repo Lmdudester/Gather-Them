@@ -232,12 +232,28 @@
             return;
         }
 
+        // Validate that decklist is not empty
+        var decklistField = document.getElementById('id_decklist');
+        var decklistError = decklistField.closest('.form-group').querySelector('.field-errors');
+        if (!decklistField.value.trim()) {
+            // Show error using same pattern as server-rendered errors
+            if (!decklistError) {
+                decklistError = document.createElement('div');
+                decklistError.className = 'field-errors';
+                decklistField.closest('.form-group').appendChild(decklistError);
+            }
+            decklistError.innerHTML = '<p>This field is required.</p>';
+            decklistError.style.display = '';
+            decklistField.classList.add('invalid');
+            return;
+        }
+
         cancelled = false;
         var overlay = document.getElementById('loading-overlay');
         var cancelBtn = document.getElementById('loading-cancel');
         overlay.classList.add('active');
 
-        var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
+        var minDelay = new Promise(function (r) { setTimeout(r, 800); });
 
         function doSubmit() {
             if (submitting || cancelled) return;
@@ -261,11 +277,11 @@
             })
             .catch(function () {});  // keep default text on failure
 
-        // Submit once both the flavor text has loaded AND 3s have elapsed
+        // Submit once both the flavor text has loaded AND min delay has elapsed
         Promise.all([flavorDone, minDelay]).then(doSubmit);
 
-        // Fallback: submit anyway after 6s if fetch hangs
-        setTimeout(doSubmit, 6000);
+        // Fallback: submit anyway after 4s if fetch hangs
+        setTimeout(doSubmit, 4000);
     });
 })();
 

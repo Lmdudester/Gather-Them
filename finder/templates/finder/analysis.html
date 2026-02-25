@@ -469,7 +469,7 @@ document.getElementById('view-toggle').addEventListener('click', function() {
         var cancelBtn = document.getElementById('loading-cancel');
         overlay.classList.add('active');
 
-        var minDelay = new Promise(function (r) { setTimeout(r, 3000); });
+        var minDelay = new Promise(function (r) { setTimeout(r, 800); });
 
         function doSubmit() {
             if (submitting || cancelled) return;
@@ -494,7 +494,7 @@ document.getElementById('view-toggle').addEventListener('click', function() {
             .catch(function () {});
 
         Promise.all([flavorDone, minDelay]).then(doSubmit);
-        setTimeout(doSubmit, 6000);
+        setTimeout(doSubmit, 4000);
     });
 })();
 
