@@ -7,12 +7,12 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import DecklistForm
-from .middleware import is_maintenance_mode, set_maintenance_mode, set_update_result
+from .middleware import enter_maintenance_mode, exit_maintenance_mode, set_update_result
 from .services.card_lookup import (
     get_random_flavor_text, get_set_cards, get_set_lands, lookup_cards,
 )
@@ -33,12 +33,14 @@ def _run_update():
         logger.error('Database update failed: %s', e)
         set_update_result('error', f'Database update failed: {e}')
     finally:
-        set_maintenance_mode(False)
+        exit_maintenance_mode()
 
 
 @require_POST
 def refresh_patterns(request):
     """Reload oracle text patterns from the JSON config file."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
     from .services.oracle_patterns import refresh_cache
     try:
         refresh_cache()
@@ -51,11 +53,13 @@ def refresh_patterns(request):
 @require_POST
 def update_db(request):
     """Kick off a background database update and redirect to maintenance page."""
-    if is_maintenance_mode():
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+
+    if not enter_maintenance_mode():
         messages.warning(request, 'A database update is already in progress.')
         return redirect('finder:index')
 
-    set_maintenance_mode(True)
     threading.Thread(target=_run_update, daemon=True).start()
     return redirect('finder:index')
 
@@ -132,11 +136,15 @@ def _tier_themes(theme_list):
 def index(request):
     """Step 1: Paste decklist, select set and format."""
     form = DecklistForm()
-    db_path = Path(settings.MTGJSON_DB_PATH)
+    db_path = Path(settings.MTGJSON_DB_PATH) if settings.MTGJSON_DB_PATH else None
     db_updated = None
-    if db_path.exists():
+    if db_path and db_path.exists():
         db_updated = datetime.fromtimestamp(db_path.stat().st_mtime)
-    return render(request, 'finder/index.html', {'form': form, 'db_updated': db_updated})
+    return render(request, 'finder/index.html', {
+        'form': form,
+        'db_updated': db_updated,
+        'is_admin': request.user.is_staff,
+    })
 
 
 def analyze(request):
@@ -413,6 +421,6 @@ def results(request):
         'filter_powers': filter_powers,
         'filter_toughnesses': filter_toughnesses,
         'filter_tags_grouped': filter_tags_grouped,
-        'deck_card_names_json': json.dumps(sorted(deck_card_names)),
+        'deck_card_names_json': deck_card_names_json,
     }
     return render(request, 'finder/results.html', context)

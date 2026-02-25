@@ -61,6 +61,7 @@ def update_database():
             db_path.rename(old_db_path)
 
         new_db_path.rename(db_path)
+        os.utime(db_path)
 
         # Clean up old backup
         if old_db_path.exists():

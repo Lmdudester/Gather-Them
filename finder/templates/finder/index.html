@@ -55,6 +55,7 @@
             <button type="submit" class="btn btn-primary">Analyze Deck</button>
         </form>
 
+        {% if is_admin %}
         <aside class="db-management">
             <h2>Database Management</h2>
             <p class="subtitle">Download the latest card data from MTGJSON.<br>The site will be unavailable during the update.</p>
@@ -77,6 +78,7 @@
                 </form>
             </div>
         </aside>
+        {% endif %}
     </div>
 </div>
 <div class="loading-overlay" id="loading-overlay">
@@ -254,11 +256,8 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var el = document.getElementById('loading-flavor');
-                el.textContent = '\u201C' + data.flavorText + '\u201D';
-                var src = document.createElement('span');
-                src.className = 'flavor-source';
-                src.textContent = '\u2014 ' + data.name;
-                el.appendChild(src);
+                el.innerHTML = '\u201C' + data.flavorText + '\u201D'
+                    + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
             })
             .catch(function () {});  // keep default text on failure
 
