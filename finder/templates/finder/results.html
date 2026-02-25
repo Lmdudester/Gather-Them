@@ -66,10 +66,6 @@
 
             {% if filter_rarities %}
             <div class="filter-section">
-                <label class="filter-mode-toggle" data-category="rarity">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
-                </label>
                 <span class="filter-section-label">Rarity</span>
                 <div class="filter-options">
                     {% for r in filter_rarities %}
@@ -81,10 +77,6 @@
 
             {% if filter_mvs %}
             <div class="filter-section">
-                <label class="filter-mode-toggle" data-category="mv">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
-                </label>
                 <span class="filter-section-label">Mana Value</span>
                 <div class="filter-options">
                     {% for mv in filter_mvs %}
@@ -96,10 +88,6 @@
 
             {% if filter_powers %}
             <div class="filter-section">
-                <label class="filter-mode-toggle" data-category="power">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
-                </label>
                 <span class="filter-section-label">Power</span>
                 <div class="filter-options">
                     {% for p in filter_powers %}
@@ -111,10 +99,6 @@
 
             {% if filter_toughnesses %}
             <div class="filter-section">
-                <label class="filter-mode-toggle" data-category="toughness">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
-                </label>
                 <span class="filter-section-label">Toughness</span>
                 <div class="filter-options">
                     {% for t in filter_toughnesses %}
@@ -148,6 +132,16 @@
         </div>
     </details>
 
+    <div class="sort-bar">
+        <span class="sort-label">Sort by</span>
+        <div class="sort-options">
+            <button type="button" class="sort-btn active" data-sort="relevance">Relevance</button>
+            <button type="button" class="sort-btn" data-sort="name">Name</button>
+            <button type="button" class="sort-btn" data-sort="mv">Mana Value</button>
+            <button type="button" class="sort-btn" data-sort="rarity">Rarity</button>
+        </div>
+    </div>
+
     <div class="card-grid">
         {% for card, matched_tags, match_count in results %}
         <a class="card-item"
@@ -159,6 +153,7 @@
            data-mv="{{ card.mv_display }}"
            data-power="{{ card.power_display }}"
            data-toughness="{{ card.toughness_display }}"
+           data-match-count="{{ match_count }}"
            data-tags="{{ matched_tags|join:',' }}">
             <div class="card-image-wrapper">
                 <img
@@ -369,29 +364,13 @@ function backToAnalysis() {
                         categoryMatch = itemTypes.some(t => values.has(t));
                     }
                 } else if (category === 'rarity') {
-                    if (isAnd) {
-                        categoryMatch = [...values].every(v => v === item.dataset.rarity);
-                    } else {
-                        categoryMatch = values.has(item.dataset.rarity);
-                    }
+                    categoryMatch = values.has(item.dataset.rarity);
                 } else if (category === 'mv') {
-                    if (isAnd) {
-                        categoryMatch = [...values].every(v => v === item.dataset.mv);
-                    } else {
-                        categoryMatch = values.has(item.dataset.mv);
-                    }
+                    categoryMatch = values.has(item.dataset.mv);
                 } else if (category === 'power') {
-                    if (isAnd) {
-                        categoryMatch = [...values].every(v => v === item.dataset.power);
-                    } else {
-                        categoryMatch = values.has(item.dataset.power);
-                    }
+                    categoryMatch = values.has(item.dataset.power);
                 } else if (category === 'toughness') {
-                    if (isAnd) {
-                        categoryMatch = [...values].every(v => v === item.dataset.toughness);
-                    } else {
-                        categoryMatch = values.has(item.dataset.toughness);
-                    }
+                    categoryMatch = values.has(item.dataset.toughness);
                 } else if (category === 'tags') {
                     const itemTags = item.dataset.tags.split(',').filter(Boolean);
                     if (isAnd) {
@@ -414,6 +393,58 @@ function backToAnalysis() {
         visibleCount.textContent = visible;
         updateActiveSummary();
     }
+})();
+
+(function() {
+    const sortBtns = document.querySelectorAll('.sort-btn');
+    const cardGrid = document.querySelector('.card-grid');
+
+    if (!sortBtns.length || !cardGrid) return;
+
+    const rarityRank = { mythic: 4, rare: 3, uncommon: 2, common: 1 };
+
+    function getCardName(el) {
+        const nameEl = el.querySelector('.card-name');
+        return nameEl ? nameEl.textContent.trim() : '';
+    }
+
+    function compareName(a, b) {
+        return getCardName(a).localeCompare(getCardName(b));
+    }
+
+    function sortCards(sortKey) {
+        const items = Array.from(cardGrid.querySelectorAll('.card-item'));
+
+        items.sort((a, b) => {
+            if (sortKey === 'relevance') {
+                const diff = (parseInt(b.dataset.matchCount) || 0) - (parseInt(a.dataset.matchCount) || 0);
+                return diff !== 0 ? diff : compareName(a, b);
+            } else if (sortKey === 'name') {
+                return compareName(a, b);
+            } else if (sortKey === 'mv') {
+                const aMv = parseInt(a.dataset.mv) || 0;
+                const bMv = parseInt(b.dataset.mv) || 0;
+                const diff = aMv - bMv;
+                return diff !== 0 ? diff : compareName(a, b);
+            } else if (sortKey === 'rarity') {
+                const aRank = rarityRank[a.dataset.rarity] || 0;
+                const bRank = rarityRank[b.dataset.rarity] || 0;
+                const diff = bRank - aRank;
+                return diff !== 0 ? diff : compareName(a, b);
+            }
+            return 0;
+        });
+
+        items.forEach(item => cardGrid.appendChild(item));
+    }
+
+    sortBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            sortBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            sortCards(btn.dataset.sort);
+        });
+    });
 })();
 </script>
 {% endblock %}
