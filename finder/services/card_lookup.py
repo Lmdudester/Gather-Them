@@ -1,4 +1,5 @@
 import json
+import random
 import sqlite3
 from contextlib import contextmanager
 
@@ -18,17 +19,22 @@ def get_db():
 
 def get_random_flavor_text():
     """Return a random card name + flavor text from the database."""
-    query = """
-        SELECT c.name, c.flavorText
-        FROM cards c
+    filter_clause = """
         WHERE c.language = 'English'
           AND c.flavorText IS NOT NULL
           AND c.flavorText != ''
-        ORDER BY RANDOM()
-        LIMIT 1
     """
     with get_db() as conn:
-        row = conn.execute(query).fetchone()
+        count = conn.execute(
+            f"SELECT COUNT(*) FROM cards c {filter_clause}"
+        ).fetchone()[0]
+        if count == 0:
+            return None
+        offset = random.randint(0, count - 1)
+        row = conn.execute(
+            f"SELECT c.name, c.flavorText FROM cards c {filter_clause} LIMIT 1 OFFSET ?",
+            (offset,),
+        ).fetchone()
     if row:
         return {'name': row['name'], 'flavorText': row['flavorText']}
     return None
