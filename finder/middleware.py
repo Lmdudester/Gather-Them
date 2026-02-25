@@ -62,6 +62,14 @@ def exit_maintenance_mode():
         pass
 
 
+def set_maintenance_mode(enabled):
+    """Enter or exit maintenance mode based on a boolean flag."""
+    if enabled:
+        enter_maintenance_mode()
+    else:
+        exit_maintenance_mode()
+
+
 def is_maintenance_mode():
     """Check whether maintenance mode is active."""
     path = _lock_file_path()

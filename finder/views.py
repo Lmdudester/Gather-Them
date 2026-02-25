@@ -7,8 +7,9 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .forms import DecklistForm
@@ -22,6 +23,16 @@ from .services.set_filter import filter_cards_by_tags
 from .services.theme_extractor import extract_themes
 
 logger = logging.getLogger(__name__)
+
+
+def _is_admin(request):
+    """Check whether the current request has admin privileges."""
+    if request.user.is_authenticated and request.user.is_staff:
+        return True
+    admin_secret = getattr(settings, 'ADMIN_SECRET', '')
+    if admin_secret and request.GET.get('admin') == admin_secret:
+        return True
+    return False
 
 
 def _run_update():
@@ -39,25 +50,39 @@ def _run_update():
 @require_POST
 def refresh_patterns(request):
     """Reload oracle text patterns from the JSON config file."""
+    if not _is_admin(request):
+        return HttpResponse('Forbidden', status=403)
     from .services.oracle_patterns import refresh_cache
     try:
         refresh_cache()
         messages.success(request, 'Oracle patterns refreshed successfully.')
     except Exception as e:
         messages.error(request, f'Failed to refresh oracle patterns: {e}')
-    return redirect('finder:index')
+    url = reverse('finder:index')
+    admin_token = request.GET.get('admin', '')
+    if admin_token:
+        url = f"{url}?admin={admin_token}"
+    return redirect(url)
 
 
 @require_POST
 def update_db(request):
     """Kick off a background database update and redirect to maintenance page."""
+    if not _is_admin(request):
+        return HttpResponse('Forbidden', status=403)
+
+    url = reverse('finder:index')
+    admin_token = request.GET.get('admin', '')
+    if admin_token:
+        url = f"{url}?admin={admin_token}"
+
     if is_maintenance_mode():
         messages.warning(request, 'A database update is already in progress.')
-        return redirect('finder:index')
+        return redirect(url)
 
     set_maintenance_mode(True)
     threading.Thread(target=_run_update, daemon=True).start()
-    return redirect('finder:index')
+    return redirect(url)
 
 
 def random_flavor(request):
@@ -136,7 +161,11 @@ def index(request):
     db_updated = None
     if db_path.exists():
         db_updated = datetime.fromtimestamp(db_path.stat().st_mtime)
-    return render(request, 'finder/index.html', {'form': form, 'db_updated': db_updated})
+    return render(request, 'finder/index.html', {
+        'form': form,
+        'db_updated': db_updated,
+        'is_admin': _is_admin(request),
+    })
 
 
 def analyze(request):

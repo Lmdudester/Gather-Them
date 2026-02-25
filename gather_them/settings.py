@@ -58,6 +58,7 @@ ORACLE_PATTERNS_PATH = os.environ.get(
     'ORACLE_PATTERNS_PATH',
     str(BASE_DIR / 'finder' / 'data' / 'oracle_patterns.json'),
 )
+ADMIN_SECRET = os.environ.get('ADMIN_SECRET', '')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
