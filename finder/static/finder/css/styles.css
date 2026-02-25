@@ -911,6 +911,52 @@ textarea.invalid, select.invalid, input[type="text"].invalid {
     color: var(--accent-hover);
 }
 
+/* === Sort Bar === */
+.sort-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.sort-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sort-options {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.sort-btn {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    font-family: inherit;
+}
+
+.sort-btn:hover {
+    border-color: var(--accent);
+    color: var(--text);
+    background: rgba(233, 69, 96, 0.08);
+}
+
+.sort-btn.active {
+    background: rgba(233, 69, 96, 0.15);
+    border-color: var(--accent);
+    color: var(--accent-hover);
+}
+
 /* === Card Grid === */
 .card-grid {
     display: grid;
@@ -1205,6 +1251,8 @@ footer {
     .relevance-slider { flex: 1; }
     .select-controls .lands-toggle { margin-left: 0; }
     .select-controls .btn-primary { flex-basis: 100%; }
+    .sort-bar { flex-wrap: wrap; }
+    .sort-btn { padding: 0.4rem 0.7rem; font-size: 0.82rem; }
     .filter-btn { padding: 0.4rem 0.7rem; font-size: 0.82rem; }
     .filter-tag-group-label { min-width: 0; }
     .filter-tag-group { flex-direction: column; gap: 0.25rem; }
