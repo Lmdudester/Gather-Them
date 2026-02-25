@@ -202,12 +202,11 @@ function backToAnalysis() {
     csrf.value = '{{ csrf_token }}';
     form.appendChild(csrf);
 
-    // Reconstruct decklist from deck card names
-    var deckNames = {{ deck_card_names_json|safe }};
+    // Use original decklist text (preserves quantities)
     var decklist = document.createElement('input');
     decklist.type = 'hidden';
     decklist.name = 'decklist';
-    decklist.value = deckNames.map(function(name) { return '1 ' + name; }).join('\n');
+    decklist.value = {{ decklist_text_json|safe }};
     form.appendChild(decklist);
 
     // Add set codes
@@ -225,6 +224,25 @@ function backToAnalysis() {
     format.name = 'format_name';
     format.value = '{{ format_name }}';
     form.appendChild(format);
+
+    // Restore selected tags
+    var selectedTags = {{ selected_tags_json|safe }};
+    selectedTags.forEach(function(tag) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_tags';
+        input.value = tag;
+        form.appendChild(input);
+    });
+
+    // Restore include_lands
+    {% if include_lands %}
+    var landsInput = document.createElement('input');
+    landsInput.type = 'hidden';
+    landsInput.name = 'include_lands';
+    landsInput.value = '1';
+    form.appendChild(landsInput);
+    {% endif %}
 
     document.body.appendChild(form);
     form.submit();

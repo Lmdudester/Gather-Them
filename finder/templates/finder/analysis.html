@@ -42,6 +42,7 @@
         <input type="hidden" name="format_name" value="{{ format_name }}">
         <input type="hidden" name="color_identity" value="{{ color_identity_json }}">
         <input type="hidden" name="deck_card_names" value="{{ deck_card_names_json }}">
+        <input type="hidden" name="decklist_text" value="{{ decklist_text }}">
 
         <p class="instructions">Select themes to find matching cards in {% for sd in set_displays %}{{ sd }}{% if not forloop.last %}, {% endif %}{% endfor %}:</p>
 
@@ -136,6 +137,22 @@ var userChecked = new Set();
 document.querySelectorAll('#combined-view input[type="checkbox"]:checked').forEach(function(cb) {
     userChecked.add(cb.value);
 });
+
+// Restore selections when returning from results via "Back to Analysis"
+var restoredTags = {{ selected_tags_json|safe }};
+if (restoredTags.length > 0) {
+    userChecked = new Set(restoredTags);
+    document.querySelectorAll('#combined-view input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = userChecked.has(cb.value);
+    });
+    document.querySelectorAll('#category-view input[type="checkbox"]').forEach(function(cb) {
+        cb.checked = userChecked.has(cb.value);
+    });
+}
+
+{% if include_lands %}
+document.querySelector('input[name="include_lands"]').checked = true;
+{% endif %}
 
 // Event delegation to keep userChecked in sync with clicks
 ['combined-view', 'category-view'].forEach(function(viewId) {
@@ -428,6 +445,25 @@ document.getElementById('view-toggle').addEventListener('click', function() {
         if (submitting) return;
         e.preventDefault();
 
+        // Validate: at least one theme or include_lands must be selected
+        var checked = form.querySelectorAll('input[name="tags"]:checked');
+        var landsChecked = form.querySelector('input[name="include_lands"]').checked;
+        if (checked.length === 0 && !landsChecked) {
+            // Show inline error (insert a dismissible banner before the form controls)
+            var existing = document.getElementById('theme-error');
+            if (!existing) {
+                var msg = document.createElement('div');
+                msg.id = 'theme-error';
+                msg.className = 'form-error';
+                msg.textContent = 'Please select at least one theme or enable "Include All Lands".';
+                form.insertBefore(msg, form.querySelector('.select-controls'));
+            }
+            return;
+        }
+        // Remove any previous error on successful validation
+        var oldErr = document.getElementById('theme-error');
+        if (oldErr) oldErr.remove();
+
         cancelled = false;
         var overlay = document.getElementById('loading-overlay');
         var cancelBtn = document.getElementById('loading-cancel');
@@ -452,11 +488,8 @@ document.getElementById('view-toggle').addEventListener('click', function() {
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var el = document.getElementById('loading-flavor');
-                el.textContent = '\u201C' + data.flavorText + '\u201D';
-                var src = document.createElement('span');
-                src.className = 'flavor-source';
-                src.textContent = '\u2014 ' + data.name;
-                el.appendChild(src);
+                el.innerHTML = '\u201C' + data.flavorText + '\u201D'
+                    + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
             })
             .catch(function () {});
 
