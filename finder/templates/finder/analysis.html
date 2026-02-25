@@ -452,8 +452,11 @@ document.getElementById('view-toggle').addEventListener('click', function() {
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var el = document.getElementById('loading-flavor');
-                el.innerHTML = '\u201C' + data.flavorText + '\u201D'
-                    + '<span class="flavor-source">\u2014 ' + data.name + '</span>';
+                el.textContent = '\u201C' + data.flavorText + '\u201D';
+                var src = document.createElement('span');
+                src.className = 'flavor-source';
+                src.textContent = '\u2014 ' + data.name;
+                el.appendChild(src);
             })
             .catch(function () {});
 

@@ -413,6 +413,6 @@ def results(request):
         'filter_powers': filter_powers,
         'filter_toughnesses': filter_toughnesses,
         'filter_tags_grouped': filter_tags_grouped,
-        'deck_card_names_json': deck_card_names_json,
+        'deck_card_names_json': json.dumps(sorted(deck_card_names)),
     }
     return render(request, 'finder/results.html', context)
