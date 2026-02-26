@@ -309,6 +309,11 @@ textarea.invalid, select.invalid, input[type="text"].invalid {
     color: var(--accent-hover);
 }
 
+.set-dropdown-item.active {
+    background: rgba(233, 69, 96, 0.12);
+    color: var(--accent-hover);
+}
+
 .set-chips {
     display: flex;
     flex-wrap: wrap;
