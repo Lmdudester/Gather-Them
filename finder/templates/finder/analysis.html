@@ -438,11 +438,9 @@ document.getElementById('view-toggle').addEventListener('click', function() {
 // Loading overlay on form submit
 (function () {
     var form = document.querySelector('.theme-form');
-    var submitting = false;
-    var cancelled = false;
+    var submitGeneration = 0;
 
     form.addEventListener('submit', function (e) {
-        if (submitting) return;
         e.preventDefault();
 
         // Validate: at least one theme or include_lands must be selected
@@ -464,7 +462,8 @@ document.getElementById('view-toggle').addEventListener('click', function() {
         var oldErr = document.getElementById('theme-error');
         if (oldErr) oldErr.remove();
 
-        cancelled = false;
+        var myGen = ++submitGeneration;
+
         var overlay = document.getElementById('loading-overlay');
         var cancelBtn = document.getElementById('loading-cancel');
         overlay.classList.add('active');
@@ -472,13 +471,14 @@ document.getElementById('view-toggle').addEventListener('click', function() {
         var minDelay = new Promise(function (r) { setTimeout(r, 800); });
 
         function doSubmit() {
-            if (submitting || cancelled) return;
-            submitting = true;
+            if (myGen !== submitGeneration) return;  // stale — cancelled or superseded
+            submitGeneration++;  // prevent any other callback from also firing
             form.submit();
         }
 
         function handleCancel() {
-            cancelled = true;
+            if (myGen !== submitGeneration) return;  // already stale
+            submitGeneration++;  // invalidate this generation's callbacks
             overlay.classList.remove('active');
         }
 
@@ -505,6 +505,7 @@ document.getElementById('view-toggle').addEventListener('click', function() {
 window.addEventListener('pageshow', function (e) {
     if (e.persisted) {
         document.getElementById('loading-overlay').classList.remove('active');
+        document.getElementById('loading-flavor').textContent = 'Gathering cards...';
     }
 });
 </script>
