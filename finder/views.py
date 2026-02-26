@@ -248,7 +248,7 @@ def analyze(request):
         'total_in_list': total_in_list,
         'total_found': total_found,
         'unfound_names': unfound_names,
-        'decklist_text': decklist_text,
+        'decklist_text_json': json.dumps(decklist_text).replace('</', '<\\/'),
         'selected_tags_json': json.dumps(request.POST.getlist('selected_tags')).replace('</', '<\\/'),
         'include_lands': request.POST.get('include_lands') == '1',
     }
@@ -262,7 +262,10 @@ def results(request):
 
     selected_tags = request.POST.getlist('tags')
     include_lands = request.POST.get('include_lands') == '1'
-    decklist_text = request.POST.get('decklist_text', '')
+    try:
+        decklist_text = json.loads(request.POST.get('decklist_text', '""'))
+    except (json.JSONDecodeError, TypeError):
+        decklist_text = ''
     set_codes_json = request.POST.get('set_codes', '[]')
     format_name = request.POST.get('format_name', '')
     color_identity_json = request.POST.get('color_identity', '[]')

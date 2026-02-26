@@ -60,7 +60,14 @@ def update_database():
                 os.remove(old_db_path)
             db_path.rename(old_db_path)
 
-        new_db_path.rename(db_path)
+        try:
+            new_db_path.rename(db_path)
+        except OSError:
+            # Rollback: restore the old database so the site keeps working
+            if old_db_path.exists() and not db_path.exists():
+                old_db_path.rename(db_path)
+            raise
+
         os.utime(db_path)
 
         # Clean up old backup
@@ -72,7 +79,8 @@ def update_database():
     except Exception as e:
         raise DatabaseUpdateError(f'Failed to update database: {e}') from e
     finally:
-        # Clean up temp files
-        for temp in (zip_path, new_db_path):
-            if temp.exists():
-                os.remove(temp)
+        # Clean up temp files (only remove .new if swap succeeded)
+        if zip_path.exists():
+            os.remove(zip_path)
+        if new_db_path.exists() and db_path.exists():
+            os.remove(new_db_path)

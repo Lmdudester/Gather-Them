@@ -42,7 +42,7 @@
         <input type="hidden" name="format_name" value="{{ format_name }}">
         <input type="hidden" name="color_identity" value="{{ color_identity_json }}">
         <input type="hidden" name="deck_card_names" value="{{ deck_card_names_json }}">
-        <input type="hidden" name="decklist_text" value="{{ decklist_text }}">
+        <input type="hidden" name="decklist_text" value="{{ decklist_text_json }}">
 
         <p class="instructions">Select themes to find matching cards in {% for sd in set_displays %}{{ sd }}{% if not forloop.last %}, {% endif %}{% endfor %}:</p>
 
