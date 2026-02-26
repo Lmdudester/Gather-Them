@@ -228,7 +228,7 @@
         {
             "regex": "(gain|gains)\\s+\\d+\\s+life",
             "label": "Gain life",
-            "category": "Graveyard"
+            "category": "Life"
         },
         {
             "regex": "(whenever|when).*?gain[s]?\\s+life",
@@ -253,7 +253,7 @@
         {
             "regex": "(whenever|when)\\s+.*?\\s+attacks",
             "label": "Attack trigger",
-            "category": "Life"
+            "category": "Combat"
         },
         {
             "regex": "(whenever|when)\\s+.*?\\s+deals\\s+combat\\s+damage",
@@ -288,7 +288,7 @@
         {
             "regex": "exile[s]?\\s+.*?return[s]?\\s+.*?(battlefield|to the battlefield)",
             "label": "Blink",
-            "category": "Combat"
+            "category": "Blink & bounce"
         },
         {
             "regex": "return[s]?\\s+.*?to\\s+(its\\s+)?owner\\'s\\s+hand",
@@ -348,12 +348,12 @@
         {
             "regex": "(search|searches)\\s+your\\s+library\\s+for\\s+.*?(land|basic)",
             "label": "Land ramp",
-            "category": "Control & theft"
+            "category": "Ramp & mana"
         },
         {
             "regex": "add[s]?\\s+\\{",
             "label": "Mana production",
-            "category": "Control & theft"
+            "category": "Ramp & mana"
         },
         {
             "regex": "(add[s]?\\s+.*?mana\\s+of\\s+any)",
@@ -398,22 +398,22 @@
         {
             "regex": "(search|searches)\\s+your\\s+library",
             "label": "Tutor",
-            "category": "Untap"
+            "category": "Tutor & library"
         },
         {
             "regex": "(reveal|look\\s+at)\\s+cards?\\s+from\\s+the\\s+top",
             "label": "Topdeck peek",
-            "category": "Untap"
+            "category": "Tutor & library"
         },
         {
             "regex": "enters(\\s+the\\s+battlefield)?",
             "label": "ETB trigger",
-            "category": "Tutor & library"
+            "category": "Enters the battlefield"
         },
         {
             "regex": "(leaves|left)\\s+the\\s+battlefield",
             "label": "LTB trigger",
-            "category": "Tutor & library"
+            "category": "Enters the battlefield"
         },
         {
             "regex": "(whenever\\s+a(n|nother)?\\s+(creature|permanent|artifact|enchantment)\\s+enters)",
@@ -423,12 +423,12 @@
         {
             "regex": "(discard|discards)\\s+(a|your|their|cards?)",
             "label": "Discard",
-            "category": "Enters the battlefield"
+            "category": "Discard & hand disruption"
         },
         {
             "regex": "(each\\s+opponent|target\\s+(opponent|player))\\s+discards",
             "label": "Hand disruption",
-            "category": "Enters the battlefield"
+            "category": "Discard & hand disruption"
         },
         {
             "regex": "(madness)",
@@ -448,12 +448,12 @@
         {
             "regex": "(equip|equipped\\s+creature)",
             "label": "Equipment",
-            "category": "Discard & hand disruption"
+            "category": "Equipment & auras"
         },
         {
             "regex": "(enchanted\\s+creature|aura)",
             "label": "Aura",
-            "category": "Discard & hand disruption"
+            "category": "Equipment & auras"
         },
         {
             "regex": "(modified)",
@@ -478,12 +478,12 @@
         {
             "regex": "whenever\\s+you\\s+cast\\s+an?\\s+enchantment",
             "label": "Enchantress trigger",
-            "category": "Equipment & auras"
+            "category": "Enchantress / constellation"
         },
         {
             "regex": "(whenever\\s+an?\\s+enchantment\\s+enters|constellation)",
             "label": "Constellation",
-            "category": "Equipment & auras"
+            "category": "Enchantress / constellation"
         },
         {
             "regex": "for\\s+each\\s+enchantment\\s+you\\s+control",
@@ -493,32 +493,32 @@
         {
             "regex": "(creatures?\\s+you\\s+control\\s+get|other\\s+creatures?\\s+.*?\\s+get)\\s+\\+",
             "label": "Anthem",
-            "category": "Enchantress / constellation"
+            "category": "Tribal / type matters"
         },
         {
             "regex": "(creatures?\\s+of\\s+the\\s+chosen\\s+type|choose\\s+a\\s+creature\\s+type)",
             "label": "Tribal payoff",
-            "category": "Enchantress / constellation"
+            "category": "Tribal / type matters"
         },
         {
             "regex": "(whenever|when)\\s+you\\s+cast\\s+(a|an)\\s+(instant|sorcery|noncreature)",
             "label": "Spellcast trigger",
-            "category": "Tribal / type matters"
+            "category": "Spellslinger"
         },
         {
             "regex": "(instant[s]?\\s+and\\s+sorcery|sorceries?\\s+and\\s+instants?)\\s+(card|in\\s+your\\s+graveyard)",
             "label": "Spell graveyard",
-            "category": "Tribal / type matters"
+            "category": "Spellslinger"
         },
         {
             "regex": "whenever\\s+.*?artifact\\s+enters",
             "label": "Artifact ETB trigger",
-            "category": "Spellslinger"
+            "category": "Artifacts matter"
         },
         {
             "regex": "for\\s+each\\s+artifact\\s+you\\s+control",
             "label": "Artifact count",
-            "category": "Spellslinger"
+            "category": "Artifacts matter"
         },
         {
             "regex": "whenever\\s+you\\s+cast\\s+an?\\s+artifact",
@@ -533,12 +533,12 @@
         {
             "regex": "(whenever\\s+a\\s+land\\s+enters|landfall)",
             "label": "Landfall",
-            "category": "Artifacts matter"
+            "category": "Lands matter"
         },
         {
             "regex": "(play\\s+an?\\s+additional\\s+land|additional\\s+land)",
             "label": "Extra land drop",
-            "category": "Artifacts matter"
+            "category": "Lands matter"
         },
         {
             "regex": "(land[s]?\\s+you\\s+control|number\\s+of\\s+lands?\\s+you\\s+control)",
@@ -558,27 +558,27 @@
         {
             "regex": "(extra\\s+turn|additional\\s+turn)",
             "label": "Extra turns",
-            "category": "Lands matter"
+            "category": "Miscellaneous archetypes"
         },
         {
             "regex": "(planeswalker)",
             "label": "Planeswalker matters",
-            "category": "Lands matter"
+            "category": "Planeswalker"
         },
         {
             "regex": "(loyalty\\s+counter|loyalty\\s+abilit)",
             "label": "Loyalty",
-            "category": "Extra turns"
+            "category": "Planeswalker"
         },
         {
             "regex": "(vote|voting|council\\'s\\s+dilemma|will\\s+of\\s+the\\s+council)",
             "label": "Voting",
-            "category": "Planeswalker"
+            "category": "Voting & politics"
         },
         {
             "regex": "(monarch|the\\s+monarch)",
             "label": "Monarch",
-            "category": "Planeswalker"
+            "category": "Voting & politics"
         },
         {
             "regex": "(the\\s+initiative|initiative)",
