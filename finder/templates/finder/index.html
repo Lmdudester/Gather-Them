@@ -28,8 +28,14 @@
                 <div class="form-group">
                     <label>{{ form.set_code.label }}</label>
                     <div class="set-picker">
-                        <input type="text" class="set-search" placeholder="Search sets..." autocomplete="off">
-                        <div class="set-dropdown"></div>
+                        <input type="text" class="set-search" placeholder="Search sets..."
+                               autocomplete="off"
+                               role="combobox"
+                               aria-expanded="false"
+                               aria-controls="set-dropdown-listbox"
+                               aria-autocomplete="list"
+                               aria-activedescendant="">
+                        <div class="set-dropdown" id="set-dropdown-listbox" role="listbox"></div>
                     </div>
                     <div class="set-chips"></div>
                     {{ form.set_code }}
@@ -96,6 +102,7 @@
     const searchInput = document.querySelector('.set-search');
     const dropdown = document.querySelector('.set-dropdown');
     const chipsContainer = document.querySelector('.set-chips');
+    let activeIndex = -1;
 
     // Build list of all sets from the hidden <select>
     const allSets = Array.from(hiddenSelect.options).map(opt => ({
@@ -116,15 +123,34 @@
         const matches = query === ''
             ? available.slice(0, RECENT_COUNT)
             : available.filter(s => s.label.toLowerCase().includes(query)).slice(0, 50);
+        activeIndex = -1;
         if (matches.length === 0) {
             dropdown.classList.remove('open');
             dropdown.innerHTML = '';
+            searchInput.setAttribute('aria-expanded', 'false');
+            searchInput.setAttribute('aria-activedescendant', '');
             return;
         }
-        dropdown.innerHTML = matches.map(s =>
-            `<div class="set-dropdown-item" data-value="${s.value}">${s.label}</div>`
+        dropdown.innerHTML = matches.map((s, i) =>
+            `<div class="set-dropdown-item" data-value="${s.value}" id="set-option-${i}" role="option" aria-selected="false">${s.label}</div>`
         ).join('');
         dropdown.classList.add('open');
+        searchInput.setAttribute('aria-expanded', 'true');
+        searchInput.setAttribute('aria-activedescendant', '');
+    }
+
+    function updateActiveItem() {
+        const items = dropdown.querySelectorAll('.set-dropdown-item');
+        items.forEach((item, i) => {
+            item.classList.toggle('active', i === activeIndex);
+            item.setAttribute('aria-selected', i === activeIndex ? 'true' : 'false');
+        });
+        if (activeIndex >= 0 && items[activeIndex]) {
+            searchInput.setAttribute('aria-activedescendant', items[activeIndex].id);
+            items[activeIndex].scrollIntoView({ block: 'nearest' });
+        } else {
+            searchInput.setAttribute('aria-activedescendant', '');
+        }
     }
 
     function renderChips() {
@@ -142,8 +168,11 @@
         const opt = hiddenSelect.querySelector(`option[value="${value}"]`);
         if (opt) opt.selected = true;
         searchInput.value = '';
+        activeIndex = -1;
         dropdown.classList.remove('open');
         dropdown.innerHTML = '';
+        searchInput.setAttribute('aria-expanded', 'false');
+        searchInput.setAttribute('aria-activedescendant', '');
         renderChips();
         document.getElementById('set-code-error').style.display = 'none';
     }
@@ -156,6 +185,43 @@
 
     searchInput.addEventListener('input', () => renderDropdown(searchInput.value));
     searchInput.addEventListener('focus', () => renderDropdown(searchInput.value));
+
+    searchInput.addEventListener('keydown', e => {
+        const items = dropdown.querySelectorAll('.set-dropdown-item');
+        const isOpen = dropdown.classList.contains('open');
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!isOpen) {
+                renderDropdown(searchInput.value);
+                const newItems = dropdown.querySelectorAll('.set-dropdown-item');
+                if (newItems.length > 0) {
+                    activeIndex = 0;
+                    updateActiveItem();
+                }
+                return;
+            }
+            if (items.length > 0) {
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                updateActiveItem();
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (isOpen && items.length > 0) {
+                activeIndex = Math.max(activeIndex - 1, -1);
+                updateActiveItem();
+            }
+        } else if (e.key === 'Enter') {
+            if (isOpen && items.length > 0) {
+                e.preventDefault();
+                if (activeIndex >= 0) {
+                    selectSet(items[activeIndex].dataset.value);
+                } else {
+                    selectSet(items[0].dataset.value);
+                }
+            }
+        }
+    });
 
     dropdown.addEventListener('click', e => {
         const item = e.target.closest('.set-dropdown-item');
@@ -171,6 +237,8 @@
         if (!e.target.closest('.set-picker')) {
             dropdown.classList.remove('open');
             dropdown.innerHTML = '';
+            searchInput.setAttribute('aria-expanded', 'false');
+            searchInput.setAttribute('aria-activedescendant', '');
         }
     });
 
@@ -178,6 +246,8 @@
         if (e.key === 'Escape') {
             dropdown.classList.remove('open');
             dropdown.innerHTML = '';
+            searchInput.setAttribute('aria-expanded', 'false');
+            searchInput.setAttribute('aria-activedescendant', '');
             searchInput.blur();
         }
     });
