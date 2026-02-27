@@ -1,8 +1,12 @@
 import json
 import sqlite3
+import threading
 from contextlib import contextmanager
 
 from django.conf import settings
+
+_sets_lock = threading.Lock()
+_sets_cache = None  # list of (code, display_label) tuples
 
 
 @contextmanager
@@ -37,23 +41,39 @@ def get_sets_for_dropdown():
     """Return sets suitable for the dropdown, recent first.
 
     Filters to playable set types (expansions, core sets, commander, etc.)
-    and excludes online-only sets.
+    and excludes online-only sets. Results are cached in-memory and
+    invalidated when the database is updated.
     """
-    playable_types = (
-        'expansion', 'core', 'draft_innovation', 'masters', 'commander',
-        'starter', 'archenemy', 'duel_deck', 'arsenal', 'spellbook',
-    )
-    placeholders = ','.join('?' for _ in playable_types)
-    query = f"""
-        SELECT code, name, releaseDate, type
-        FROM sets
-        WHERE type IN ({placeholders})
-          AND isOnlineOnly = 0
-        ORDER BY releaseDate DESC, name ASC
-    """
-    with get_db() as conn:
-        rows = conn.execute(query, playable_types).fetchall()
-    return [(row['code'], f"{row['name']} ({row['code'].upper()})") for row in rows]
+    global _sets_cache
+    if _sets_cache is not None:
+        return list(_sets_cache)
+    with _sets_lock:
+        if _sets_cache is not None:
+            return list(_sets_cache)
+        playable_types = (
+            'expansion', 'core', 'draft_innovation', 'masters', 'commander',
+            'starter', 'archenemy', 'duel_deck', 'arsenal', 'spellbook',
+        )
+        placeholders = ','.join('?' for _ in playable_types)
+        query = f"""
+            SELECT code, name, releaseDate, type
+            FROM sets
+            WHERE type IN ({placeholders})
+              AND isOnlineOnly = 0
+            ORDER BY releaseDate DESC, name ASC
+        """
+        with get_db() as conn:
+            rows = conn.execute(query, playable_types).fetchall()
+        result = [(row['code'], f"{row['name']} ({row['code'].upper()})") for row in rows]
+        _sets_cache = result
+        return list(result)
+
+
+def invalidate_sets_cache():
+    """Clear the cached sets list so the next call re-queries the database."""
+    global _sets_cache
+    with _sets_lock:
+        _sets_cache = None
 
 
 def _parse_json_col(value):
@@ -245,6 +265,8 @@ def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
     conditions = [
         f"c.setCode IN ({placeholders})",
         "c.language = 'English'",
+        "c.types LIKE '%Land%'",
+        "(c.supertypes IS NULL OR c.supertypes NOT LIKE '%Basic%')",
     ]
 
     # Format legality filter
@@ -260,29 +282,15 @@ def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
             conditions.append(f"cl.{format_name} IN ('Legal', 'Restricted')")
 
     query += " WHERE " + " AND ".join(conditions)
+    query += " GROUP BY c.name"
 
     with get_db() as conn:
         rows = conn.execute(query, params).fetchall()
 
     cards = []
-    seen_names = set()
     for row in rows:
         card = _row_to_card(row)
         card['scryfallId'] = row['scryfallId']
-
-        # Only lands
-        if 'Land' not in card.get('types', []):
-            continue
-
-        # Exclude basic lands
-        if 'Basic' in card.get('supertypes', []):
-            continue
-
-        # Deduplicate by name
-        name = card['name']
-        if name in seen_names:
-            continue
-        seen_names.add(name)
 
         # Intersection-based color identity: colorless always included,
         # otherwise at least one color must overlap with the deck's CI
@@ -338,21 +346,15 @@ def get_set_cards(set_codes, format_name=None, deck_color_identity=None):
             conditions.append(f"cl.{format_name} IN ('Legal', 'Restricted')")
 
     query += " WHERE " + " AND ".join(conditions)
+    query += " GROUP BY c.name"
 
     with get_db() as conn:
         rows = conn.execute(query, params).fetchall()
 
     cards = []
-    seen_names = set()
     for row in rows:
         card = _row_to_card(row)
         card['scryfallId'] = row['scryfallId']
-
-        # Deduplicate by name (same card can have multiple printings in a set)
-        name = card['name']
-        if name in seen_names:
-            continue
-        seen_names.add(name)
 
         # Color identity filter
         if deck_color_identity is not None:

@@ -15,7 +15,8 @@ from django.views.decorators.http import require_POST
 from .forms import DecklistForm
 from .middleware import is_maintenance_mode, set_maintenance_mode, set_update_result
 from .services.card_lookup import (
-    get_random_flavor_text, get_set_cards, get_set_lands, lookup_cards,
+    get_random_flavor_text, get_set_cards, get_set_lands,
+    invalidate_sets_cache, lookup_cards,
 )
 from .services.db_updater import DatabaseUpdateError, update_database
 from .services.deck_parser import parse_decklist
@@ -39,6 +40,7 @@ def _run_update():
     """Background worker for database update."""
     try:
         update_database()
+        invalidate_sets_cache()
         set_update_result('success', 'Database updated successfully.')
     except DatabaseUpdateError as e:
         logger.error('Database update failed: %s', e)
