@@ -22,6 +22,8 @@ FORMAT_CHOICES = [
 
 
 class DecklistForm(forms.Form):
+    use_required_attribute = False
+
     decklist = forms.CharField(
         max_length=20000,
         widget=forms.Textarea(attrs={
