@@ -22,6 +22,8 @@ FORMAT_CHOICES = [
 
 
 class DecklistForm(forms.Form):
+    use_required_attribute = False
+
     decklist = forms.CharField(
         widget=forms.Textarea(attrs={
             'rows': 20,

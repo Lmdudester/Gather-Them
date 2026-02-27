@@ -167,8 +167,8 @@
             <div class="card-info">
                 <span class="card-name">{{ card.name }}</span>
                 <div class="card-matched-tags">
-                    {% for tag in matched_tags %}
-                    <span class="tag tag-small">{{ tag|tag_display }}</span>
+                    {% for display_name in matched_tags|unique_tag_displays %}
+                    <span class="tag tag-small">{{ display_name }}</span>
                     {% endfor %}
                 </div>
             </div>

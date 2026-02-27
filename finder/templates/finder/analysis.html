@@ -154,6 +154,18 @@ if (restoredTags.length > 0) {
 document.querySelector('input[name="include_lands"]').checked = true;
 {% endif %}
 
+// Lands toggle fallback for browsers without :has() support
+(function() {
+    var toggle = document.querySelector('.lands-toggle input[type="checkbox"]');
+    if (!toggle) return;
+    var label = toggle.closest('.lands-toggle');
+    function sync() {
+        label.classList.toggle('lands-toggle-checked', toggle.checked);
+    }
+    toggle.addEventListener('change', sync);
+    sync(); // initial state
+})();
+
 // Event delegation to keep userChecked in sync with clicks
 ['combined-view', 'category-view'].forEach(function(viewId) {
     document.getElementById(viewId).addEventListener('change', function(e) {

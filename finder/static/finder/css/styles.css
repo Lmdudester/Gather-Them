@@ -607,7 +607,8 @@ textarea.invalid, select.invalid, input[type="text"].invalid {
     user-select: none;
 }
 
-.lands-toggle:has(input:checked) {
+.lands-toggle:has(input:checked),
+.lands-toggle.lands-toggle-checked {
     background: rgba(76, 175, 80, 0.15);
     border-color: var(--success);
 }
@@ -620,10 +621,37 @@ textarea.invalid, select.invalid, input[type="text"].invalid {
     font-size: 1rem;
     font-weight: 600;
     color: var(--accent-hover);
+    display: inline-flex;
+    align-items: center;
 }
 
-.lands-toggle:has(input:checked) .lands-toggle-label {
+.lands-toggle-label::before {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    margin-right: 0.5rem;
+    vertical-align: text-bottom;
+    position: relative;
+}
+
+.lands-toggle:has(input:checked) .lands-toggle-label,
+.lands-toggle.lands-toggle-checked .lands-toggle-label {
     color: #81c784;
+}
+
+.lands-toggle:has(input:checked) .lands-toggle-label::before,
+.lands-toggle.lands-toggle-checked .lands-toggle-label::before {
+    content: '\2713';
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    text-align: center;
+    font-weight: 700;
 }
 
 /* === Relevance Filter === */
