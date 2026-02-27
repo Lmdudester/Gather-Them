@@ -9,6 +9,7 @@ import json
 import logging
 import re
 import threading
+from typing import NamedTuple, Optional
 
 from django.conf import settings
 
@@ -25,11 +26,15 @@ _KEYWORD_MATTERS = [
 ]
 
 _lock = threading.Lock()
-_cache = {
-    'patterns': None,       # list[(compiled_regex, label)]
-    'pattern_map': None,    # dict[label -> compiled_regex]
-    'exclude_types': None,  # dict[label -> set[str]]
-}
+
+
+class _CacheEntry(NamedTuple):
+    patterns: list       # list[(compiled_regex, label)]
+    pattern_map: dict    # dict[label -> compiled_regex]
+    exclude_types: dict  # dict[label -> set[str]]
+
+
+_cache: Optional[_CacheEntry] = None
 
 
 def _load_patterns():
@@ -71,38 +76,35 @@ def _load_patterns():
 
 def _ensure_loaded():
     """Lazy-load patterns on first access with double-checked locking."""
-    if _cache['patterns'] is None:
+    global _cache
+    if _cache is None:
         with _lock:
-            if _cache['patterns'] is None:
+            if _cache is None:
                 patterns, pattern_map, exclude_types = _load_patterns()
-                _cache['patterns'] = patterns
-                _cache['pattern_map'] = pattern_map
-                _cache['exclude_types'] = exclude_types
+                _cache = _CacheEntry(patterns, pattern_map, exclude_types)
 
 
 def refresh_cache():
     """Re-read the JSON file and swap the in-memory cache atomically."""
+    global _cache
     patterns, pattern_map, exclude_types = _load_patterns()
-    with _lock:
-        _cache['patterns'] = patterns
-        _cache['pattern_map'] = pattern_map
-        _cache['exclude_types'] = exclude_types
+    _cache = _CacheEntry(patterns, pattern_map, exclude_types)
     logger.info('Oracle patterns refreshed: %d patterns loaded.', len(patterns))
 
 
 def get_oracle_patterns():
     """Return list of (compiled_regex, label) tuples."""
     _ensure_loaded()
-    return _cache['patterns']
+    return _cache.patterns
 
 
 def get_oracle_pattern_map():
     """Return dict mapping label -> compiled_regex."""
     _ensure_loaded()
-    return _cache['pattern_map']
+    return _cache.pattern_map
 
 
 def get_oracle_pattern_exclude_types():
     """Return dict mapping label -> set of card types to exclude."""
     _ensure_loaded()
-    return _cache['exclude_types']
+    return _cache.exclude_types
