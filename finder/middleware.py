@@ -99,12 +99,15 @@ def pop_update_result():
         return None
 
 
+_MAINTENANCE_ALLOWED_PATHS = {'/update-db/', '/api/random-flavor/'}
+
+
 class MaintenanceMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        if is_maintenance_mode() and request.path != '/update-db/':
+        if is_maintenance_mode() and request.path not in _MAINTENANCE_ALLOWED_PATHS:
             html = render_to_string('finder/maintenance.html', request=request)
             return HttpResponse(html, status=503)
 
