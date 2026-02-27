@@ -29,10 +29,30 @@ def _is_admin(request):
     """Check whether the current request has admin privileges."""
     if request.user.is_authenticated and request.user.is_staff:
         return True
-    admin_secret = getattr(settings, 'ADMIN_SECRET', '')
-    if admin_secret and request.GET.get('admin') == admin_secret:
+    if request.session.get('is_admin'):
         return True
     return False
+
+
+@require_POST
+def admin_login(request):
+    """Authenticate as admin using the shared secret."""
+    admin_secret = getattr(settings, 'ADMIN_SECRET', '')
+    provided = request.POST.get('admin_secret', '')
+    if admin_secret and provided == admin_secret:
+        request.session['is_admin'] = True
+        messages.success(request, 'Logged in as admin.')
+    else:
+        messages.error(request, 'Invalid admin secret.')
+    return redirect(reverse('finder:index'))
+
+
+@require_POST
+def admin_logout(request):
+    """Clear admin session flag."""
+    request.session.pop('is_admin', None)
+    messages.success(request, 'Logged out of admin.')
+    return redirect(reverse('finder:index'))
 
 
 def _run_update():
@@ -58,11 +78,7 @@ def refresh_patterns(request):
         messages.success(request, 'Oracle patterns refreshed successfully.')
     except Exception as e:
         messages.error(request, f'Failed to refresh oracle patterns: {e}')
-    url = reverse('finder:index')
-    admin_token = request.GET.get('admin', '')
-    if admin_token:
-        url = f"{url}?admin={admin_token}"
-    return redirect(url)
+    return redirect(reverse('finder:index'))
 
 
 @require_POST
@@ -72,9 +88,6 @@ def update_db(request):
         return HttpResponse('Forbidden', status=403)
 
     url = reverse('finder:index')
-    admin_token = request.GET.get('admin', '')
-    if admin_token:
-        url = f"{url}?admin={admin_token}"
 
     if is_maintenance_mode():
         messages.warning(request, 'A database update is already in progress.')
@@ -238,18 +251,21 @@ def analyze(request):
         'tiered_themes': tiered_themes,
         'merged_tiers': merged_tiers,
         'max_concept_count': max_concept_count,
+        'set_codes': set_codes,
         'set_codes_json': json.dumps(set_codes),
         'set_displays': set_displays,
         'format_name': format_name,
         'format_display': format_display,
         'color_identity': color_identity,
         'color_identity_json': json.dumps(color_identity),
+        'deck_card_names': deck_card_names,
         'deck_card_names_json': json.dumps(deck_card_names),
         'total_in_list': total_in_list,
         'total_found': total_found,
         'unfound_names': unfound_names,
-        'decklist_text_json': json.dumps(decklist_text).replace('</', '<\\/'),
-        'selected_tags_json': json.dumps(request.POST.getlist('selected_tags')).replace('</', '<\\/'),
+        'decklist_text': decklist_text,
+        'decklist_text_json': json.dumps(decklist_text),
+        'selected_tags_data': request.POST.getlist('selected_tags'),
         'include_lands': request.POST.get('include_lands') == '1',
     }
     return render(request, 'finder/analysis.html', context)
@@ -434,7 +450,7 @@ def results(request):
         'results': matched_results,
         'selected_tags': selected_tags,
         'include_lands': include_lands,
-        'set_codes_json': json.dumps(set_codes),
+        'set_codes': set_codes,
         'set_displays': set_displays,
         'format_name': format_name,
         'format_display': format_display,
@@ -448,7 +464,7 @@ def results(request):
         'filter_toughnesses': filter_toughnesses,
         'filter_tags_grouped': filter_tags_grouped,
         'deck_card_names_json': deck_card_names_json,
-        'decklist_text_json': json.dumps(decklist_text).replace('</', '<\\/'),
-        'selected_tags_json': json.dumps(selected_tags).replace('</', '<\\/'),
+        'decklist_text': decklist_text,
+        'selected_tags_data': selected_tags,
     }
     return render(request, 'finder/results.html', context)

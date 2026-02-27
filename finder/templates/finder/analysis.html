@@ -119,6 +119,8 @@
     <button type="button" class="btn btn-secondary loading-cancel" id="loading-cancel">Cancel</button>
 </div>
 
+{{ selected_tags_data|json_script:"selected-tags-data" }}
+
 <script>
 // === Data extraction ===
 var allConcepts = [];
@@ -139,7 +141,7 @@ document.querySelectorAll('#combined-view input[type="checkbox"]:checked').forEa
 });
 
 // Restore selections when returning from results via "Back to Analysis"
-var restoredTags = {{ selected_tags_json|safe }};
+var restoredTags = JSON.parse(document.getElementById('selected-tags-data').textContent);
 if (restoredTags.length > 0) {
     userChecked = new Set(restoredTags);
     document.querySelectorAll('#combined-view input[type="checkbox"]').forEach(function(cb) {

@@ -23,8 +23,10 @@ FORMAT_CHOICES = [
 
 class DecklistForm(forms.Form):
     decklist = forms.CharField(
+        max_length=20000,
         widget=forms.Textarea(attrs={
             'rows': 20,
+            'maxlength': '20000',
             'placeholder': (
                 'Paste your decklist here...\n\n'
                 'Format:\n'

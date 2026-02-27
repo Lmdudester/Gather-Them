@@ -185,6 +185,9 @@
 {% endblock %}
 
 {% block extra_js %}
+{{ decklist_text|json_script:"decklist-text-data" }}
+{{ set_codes|json_script:"set-codes-data" }}
+{{ selected_tags_data|json_script:"selected-tags-data" }}
 <script>
 function backToAnalysis() {
     var form = document.createElement('form');
@@ -201,11 +204,11 @@ function backToAnalysis() {
     var decklist = document.createElement('input');
     decklist.type = 'hidden';
     decklist.name = 'decklist';
-    decklist.value = {{ decklist_text_json|safe }};
+    decklist.value = JSON.parse(document.getElementById('decklist-text-data').textContent);
     form.appendChild(decklist);
 
     // Add set codes
-    {{ set_codes_json|safe }}.forEach(function(code) {
+    JSON.parse(document.getElementById('set-codes-data').textContent).forEach(function(code) {
         var input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'set_code';
@@ -221,7 +224,7 @@ function backToAnalysis() {
     form.appendChild(format);
 
     // Restore selected tags
-    var selectedTags = {{ selected_tags_json|safe }};
+    var selectedTags = JSON.parse(document.getElementById('selected-tags-data').textContent);
     selectedTags.forEach(function(tag) {
         var input = document.createElement('input');
         input.type = 'hidden';
