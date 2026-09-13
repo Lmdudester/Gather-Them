@@ -1,6 +1,7 @@
 import sqlite3
 
 from django.test import TestCase
+from django.urls import reverse
 from unittest.mock import patch
 
 from finder.services.card_lookup import lookup_cards
@@ -75,6 +76,39 @@ def _build_test_db():
     )
     conn.row_factory = sqlite3.Row
     return conn
+
+
+class PublicMaintenanceControlsTests(TestCase):
+    """Homepage maintenance actions do not require Django authentication."""
+
+    def test_anonymous_homepage_shows_maintenance_controls(self):
+        with patch('finder.forms.get_sets_for_dropdown', return_value=[]):
+            response = self.client.get(reverse('finder:index'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Update Database')
+        self.assertContains(response, 'Refresh Oracle Patterns')
+        self.assertContains(response, 'no admin login is required')
+
+    def test_anonymous_user_can_refresh_oracle_patterns(self):
+        with patch('finder.services.oracle_patterns.refresh_cache') as refresh_cache:
+            response = self.client.post(reverse('finder:refresh_patterns'))
+
+        self.assertEqual(response.status_code, 302)
+        refresh_cache.assert_called_once_with()
+
+    def test_anonymous_user_can_start_database_update(self):
+        with (
+            patch('finder.views.is_maintenance_mode', return_value=False),
+            patch('finder.views.set_maintenance_mode') as set_maintenance_mode,
+            patch('finder.views.threading.Thread') as thread,
+        ):
+            response = self.client.post(reverse('finder:update_db'))
+
+        self.assertEqual(response.status_code, 302)
+        set_maintenance_mode.assert_called_once_with(True)
+        thread.assert_called_once()
+        thread.return_value.start.assert_called_once_with()
 
 
 class LookupCardsTests(TestCase):

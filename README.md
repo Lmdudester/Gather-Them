@@ -28,6 +28,7 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Playable sets only** — filters to expansions, core sets, commander products, masters sets, and similar, sorted by release date
 - **One-click database update** — download the latest MTGJSON data from within the app, with a maintenance page shown during the update
 - **Hot-reloadable oracle patterns** — patterns are stored in a JSON config file (`finder/data/oracle_patterns.json`) and can be reloaded at runtime via a button on the homepage, no server restart needed
+- **Public maintenance tools** — database and oracle pattern refreshes are available from the homepage without an admin login
 - **Loading transitions** — page transitions show a pulsing logo overlay with random card flavor text pulled from the database
 - **Mobile friendly** — responsive layout adapts to phone and tablet screens
 

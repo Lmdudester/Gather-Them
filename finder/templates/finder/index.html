@@ -61,10 +61,9 @@
             <button type="submit" class="btn btn-primary">Analyze Deck</button>
         </form>
 
-        {% if is_admin %}
         <aside class="db-management">
             <h2>Database Management</h2>
-            <p class="subtitle">Download the latest card data from MTGJSON.<br>The site will be unavailable during the update.</p>
+            <p class="subtitle">These tools are available to everyone; no admin login is required.<br>Updating makes the site temporarily unavailable.</p>
             <div class="db-management-row">
                 <form method="post" action="{% url 'finder:update_db' %}" onsubmit="return confirm('This will download the latest database from MTGJSON and replace the current one. The site will be unavailable during the update. Continue?');">
                     {% csrf_token %}
@@ -83,25 +82,7 @@
                     <button type="submit" class="btn btn-secondary">Refresh Oracle Patterns</button>
                 </form>
             </div>
-            <hr class="db-management-divider">
-            <form method="post" action="{% url 'finder:admin_logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-secondary">Admin Logout</button>
-            </form>
         </aside>
-        {% else %}
-        <aside class="db-management">
-            <h2>Admin Login</h2>
-            <form method="post" action="{% url 'finder:admin_login' %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="admin-secret">Admin Secret</label>
-                    <input type="password" id="admin-secret" name="admin_secret" autocomplete="off">
-                </div>
-                <button type="submit" class="btn btn-secondary">Login</button>
-            </form>
-        </aside>
-        {% endif %}
     </div>
 </div>
 <div class="loading-overlay" id="loading-overlay">

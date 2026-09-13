@@ -7,7 +7,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -26,36 +26,6 @@ from .services.theme_extractor import extract_themes
 logger = logging.getLogger(__name__)
 
 
-def _is_admin(request):
-    """Check whether the current request has admin privileges."""
-    if request.user.is_authenticated and request.user.is_staff:
-        return True
-    if request.session.get('is_admin'):
-        return True
-    return False
-
-
-@require_POST
-def admin_login(request):
-    """Authenticate as admin using the shared secret."""
-    admin_secret = getattr(settings, 'ADMIN_SECRET', '')
-    provided = request.POST.get('admin_secret', '')
-    if admin_secret and provided == admin_secret:
-        request.session['is_admin'] = True
-        messages.success(request, 'Logged in as admin.')
-    else:
-        messages.error(request, 'Invalid admin secret.')
-    return redirect(reverse('finder:index'))
-
-
-@require_POST
-def admin_logout(request):
-    """Clear admin session flag."""
-    request.session.pop('is_admin', None)
-    messages.success(request, 'Logged out of admin.')
-    return redirect(reverse('finder:index'))
-
-
 def _run_update():
     """Background worker for database update."""
     try:
@@ -71,9 +41,7 @@ def _run_update():
 
 @require_POST
 def refresh_patterns(request):
-    """Reload oracle text patterns from the JSON config file."""
-    if not _is_admin(request):
-        return HttpResponse('Forbidden', status=403)
+    """Reload oracle text patterns; this maintenance action is public."""
     from .services.oracle_patterns import refresh_cache
     try:
         refresh_cache()
@@ -85,12 +53,8 @@ def refresh_patterns(request):
 
 @require_POST
 def update_db(request):
-    """Kick off a background database update and redirect to maintenance page."""
-    if not _is_admin(request):
-        return HttpResponse('Forbidden', status=403)
-
+    """Start a public background database update and redirect home."""
     url = reverse('finder:index')
-
     if is_maintenance_mode():
         messages.warning(request, 'A database update is already in progress.')
         return redirect(url)
@@ -179,7 +143,6 @@ def index(request):
     return render(request, 'finder/index.html', {
         'form': form,
         'db_updated': db_updated,
-        'is_admin': _is_admin(request),
     })
 
 
