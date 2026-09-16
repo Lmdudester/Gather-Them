@@ -1,6 +1,7 @@
 from django import forms
 
 from .services.card_lookup import get_sets_for_dropdown
+from .services.set_selection import MAX_SET_SELECTIONS, normalize_set_codes
 
 
 FORMAT_CHOICES = [
@@ -52,3 +53,28 @@ class DecklistForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['set_code'].choices = get_sets_for_dropdown()
+
+
+class SetAnalysisForm(forms.Form):
+    """Set-only entry form with server-side choice and limit validation."""
+
+    use_required_attribute = False
+
+    set_code = forms.MultipleChoiceField(
+        label='Sets to analyze',
+        widget=forms.SelectMultiple(attrs={'class': 'set-select-hidden'}),
+        error_messages={'required': 'Please select at least one target set.'},
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['set_code'].choices = get_sets_for_dropdown()
+
+    def clean_set_code(self):
+        try:
+            return normalize_set_codes(
+                self.cleaned_data['set_code'],
+                max_count=MAX_SET_SELECTIONS,
+            )
+        except ValueError as exc:
+            raise forms.ValidationError(str(exc)) from exc

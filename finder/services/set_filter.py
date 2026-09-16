@@ -1,7 +1,10 @@
-from .oracle_patterns import get_oracle_pattern_map
+from .oracle_patterns import (
+    get_oracle_pattern_exclude_types,
+    get_oracle_pattern_map,
+)
 
 
-def filter_cards_by_tags(cards, selected_tags):
+def filter_cards_by_tags(cards, selected_tags, apply_oracle_exclusions=False):
     """Filter and rank set cards by selected theme tags.
 
     Args:
@@ -18,11 +21,15 @@ def filter_cards_by_tags(cards, selected_tags):
 
     # Parse tags into lookup structures
     parsed_tags = []
+    seen_tags = set()
     for tag in selected_tags:
         if ':' not in tag:
             continue
         category, name = tag.split(':', 1)
-        parsed_tags.append((category.strip(), name.strip()))
+        parsed = (category.strip(), name.strip())
+        if parsed not in seen_tags:
+            seen_tags.add(parsed)
+            parsed_tags.append(parsed)
 
     if not parsed_tags:
         return []
@@ -51,7 +58,15 @@ def filter_cards_by_tags(cards, selected_tags):
 
             elif category == 'Oracle Pattern':
                 text = (card.get('text') or '').lower()
-                if text and _matches_oracle_pattern(name, text):
+                if (
+                    text
+                    and _matches_oracle_pattern(
+                        name,
+                        text,
+                        card=card,
+                        apply_oracle_exclusions=apply_oracle_exclusions,
+                    )
+                ):
                     matched.append(f'Oracle Pattern:{name}')
 
             elif category == 'Stat Profile':
@@ -89,8 +104,17 @@ def _matches_stats(stat_name, card):
     return False
 
 
-def _matches_oracle_pattern(pattern_label, text_lower):
+def _matches_oracle_pattern(
+    pattern_label,
+    text_lower,
+    card=None,
+    apply_oracle_exclusions=False,
+):
     """Check if oracle text matches a named pattern."""
+    if apply_oracle_exclusions and card is not None:
+        excluded = get_oracle_pattern_exclude_types().get(pattern_label)
+        if excluded and set(card.get('types', [])) & excluded:
+            return False
     compiled_re = get_oracle_pattern_map().get(pattern_label)
     if compiled_re:
         return bool(compiled_re.search(text_lower))

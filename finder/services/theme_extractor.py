@@ -114,3 +114,41 @@ def extract_themes(cards_with_qty):
         'Stat Profile': _filter_and_sort(stats_counts),
         'color_identity': sorted(color_identity),
     }
+
+
+def extract_oracle_patterns(cards):
+    """Count oracle patterns across distinct cards, retaining singletons.
+
+    Set analysis has no deck quantities. The set-card query already groups by
+    card name, but this helper also guards its own contract against duplicate
+    names so a shared card appearing in multiple selected sets contributes
+    only once.
+    """
+    oracle_counts = Counter()
+    seen_names = set()
+    oracle_patterns = get_oracle_patterns()
+    exclude_types = get_oracle_pattern_exclude_types()
+
+    for index, card in enumerate(cards or []):
+        name = card.get('name')
+        identity = name if name else ('__unnamed__', index)
+        if identity in seen_names:
+            continue
+        seen_names.add(identity)
+
+        text = card.get('text') or ''
+        if not text:
+            continue
+        text_lower = text.lower()
+        card_types = set(card.get('types', []))
+        for compiled_re, label in oracle_patterns:
+            excluded = exclude_types.get(label)
+            if excluded and card_types & excluded:
+                continue
+            if compiled_re.search(text_lower):
+                oracle_counts[label] += 1
+
+    return sorted(
+        oracle_counts.items(),
+        key=lambda item: (-item[1], item[0]),
+    )

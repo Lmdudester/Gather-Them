@@ -5,8 +5,14 @@ from contextlib import contextmanager
 
 from django.conf import settings
 
+from .set_selection import normalize_set_codes
+
 _sets_lock = threading.Lock()
 _sets_cache = None  # list of (code, display_label) tuples
+
+
+class DatabaseUnavailableError(RuntimeError):
+    """Raised when the MTGJSON database cannot support the set flow."""
 
 
 @contextmanager
@@ -62,8 +68,13 @@ def get_sets_for_dropdown():
               AND isOnlineOnly = 0
             ORDER BY releaseDate DESC, name ASC
         """
-        with get_db() as conn:
-            rows = conn.execute(query, playable_types).fetchall()
+        try:
+            with get_db() as conn:
+                rows = conn.execute(query, playable_types).fetchall()
+        except (sqlite3.Error, OSError, TypeError, ValueError):
+            # Do not leave a warmed cache masking a broken/replaced database.
+            _sets_cache = None
+            raise
         result = [(row['code'], f"{row['name']} ({row['code'].upper()})") for row in rows]
         _sets_cache = result
         return list(result)
@@ -74,6 +85,38 @@ def invalidate_sets_cache():
     global _sets_cache
     with _sets_lock:
         _sets_cache = None
+
+
+def check_set_flow_database():
+    """Probe every schema dependency used by set selection and results.
+
+    This deliberately bypasses the in-memory set-list cache and compiles the
+    actual set-list and card-plus-identifier query shapes. Callers translate
+    the internal database exception into the public 503 recovery page.
+    """
+    try:
+        with get_db() as conn:
+            conn.execute("""
+                SELECT code, name, releaseDate, type, isOnlineOnly
+                FROM sets
+                ORDER BY releaseDate DESC, name ASC
+                LIMIT 1
+            """).fetchone()
+            conn.execute("""
+                SELECT c.uuid, c.name, c.faceName, c.flavorName, c.text,
+                       c.types, c.subtypes, c.supertypes, c.colors,
+                       c.colorIdentity, c.keywords, c.printings,
+                       c.language, c.setCode, c.number, c.rarity,
+                       c.manaValue, c.power, c.toughness, c.flavorText,
+                       ci.scryfallId
+                FROM cards c
+                LEFT JOIN cardIdentifiers ci ON c.uuid = ci.uuid
+                WHERE c.language = 'English'
+                LIMIT 1
+            """).fetchone()
+    except (sqlite3.Error, OSError, TypeError, ValueError) as exc:
+        invalidate_sets_cache()
+        raise DatabaseUnavailableError from exc
 
 
 def _parse_json_col(value):
@@ -237,7 +280,12 @@ def _aggregate_multi_face(cards_by_name):
     return result
 
 
-def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
+def get_set_lands(
+    set_codes,
+    format_name=None,
+    deck_color_identity=None,
+    max_set_codes=None,
+):
     """Get non-basic lands from sets using intersection-based color identity.
 
     Unlike get_set_cards (subset check), this includes a land if it shares
@@ -248,12 +296,14 @@ def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
         set_codes: A set code string or list of set codes.
         format_name: Format column name for legality filtering.
         deck_color_identity: List of colors for intersection-based CI filtering.
+        max_set_codes: Optional set-mode-only maximum checked before SQL.
 
     Returns:
         List of card dicts (non-basic lands only).
     """
-    if isinstance(set_codes, str):
-        set_codes = [set_codes]
+    set_codes = normalize_set_codes(set_codes, max_count=max_set_codes)
+    if not set_codes:
+        return []
 
     query = """
         SELECT c.*, ci.scryfallId
@@ -305,7 +355,12 @@ def get_set_lands(set_codes, format_name=None, deck_color_identity=None):
     return cards
 
 
-def get_set_cards(set_codes, format_name=None, deck_color_identity=None):
+def get_set_cards(
+    set_codes,
+    format_name=None,
+    deck_color_identity=None,
+    max_set_codes=None,
+):
     """Get all cards from one or more sets, with optional format/color filtering.
 
     Args:
@@ -313,12 +368,14 @@ def get_set_cards(set_codes, format_name=None, deck_color_identity=None):
         format_name: Format column name for legality filtering (e.g., 'commander')
         deck_color_identity: List of colors (e.g., ['R', 'W']) for color identity filtering.
                            Only cards whose colorIdentity is a subset will be included.
+        max_set_codes: Optional set-mode-only maximum checked before SQL.
 
     Returns:
         List of card dicts with parsed JSON fields and scryfallId.
     """
-    if isinstance(set_codes, str):
-        set_codes = [set_codes]
+    set_codes = normalize_set_codes(set_codes, max_count=max_set_codes)
+    if not set_codes:
+        return []
 
     query = """
         SELECT c.*, ci.scryfallId

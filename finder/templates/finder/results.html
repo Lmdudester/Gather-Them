@@ -1,17 +1,18 @@
 {% extends "finder/base.html" %}
 {% load card_extras %}
-{% block title %}Results - Gather Them{% endblock %}
+{% block title %}{% if set_mode %}Set Results{% else %}Results{% endif %} - Gather Them{% endblock %}
 
 {% block content %}
 <div class="container">
-    <h1>Matching Cards</h1>
+    <h1>{% if set_mode %}Set Matching Cards{% else %}Matching Cards{% endif %}</h1>
 
     <div class="stats-bar">
-        <span class="stat"><strong>{{ total_matched }}</strong> cards match your themes:</span>
+        <span class="stat"><strong>{{ total_matched }}</strong> cards match your {% if set_mode %}selected oracle tags{% else %}themes{% endif %}:</span>
         <div class="stat-criteria">
             {% for sd in set_displays %}
             <span class="stat-chip">{{ sd }}</span>
             {% endfor %}
+            {% if not set_mode %}
             <span class="stat-chip">{{ format_display }}</span>
             {% if color_identity %}
             <span class="stat-chip">
@@ -20,16 +21,17 @@
                 {% endfor %}
             </span>
             {% endif %}
+            {% endif %}
         </div>
     </div>
 
     <div class="actions">
         <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
-        <button type="button" class="btn btn-primary" onclick="backToAnalysis()">Back to Analysis</button>
+        <button type="button" class="btn btn-primary" onclick="backToAnalysis()">{% if set_mode %}Back to Set Analysis{% else %}Back to Analysis{% endif %}</button>
     </div>
 
     <details class="selected-tags-summary">
-        <summary>{{ selected_tags|length }} theme{{ selected_tags|length|pluralize }} selected</summary>
+        <summary>{{ selected_tags|length }} {% if set_mode %}oracle tag{{ selected_tags|length|pluralize }}{% else %}theme{{ selected_tags|length|pluralize }}{% endif %} selected</summary>
         <div class="tag-list">
             {% for tag in selected_tags %}
             <span class="tag">{{ tag|tag_display }}</span>
@@ -42,18 +44,42 @@
         <summary class="filter-bar-header">
             <div class="filter-bar-header-row">
                 <span class="filter-label">Filters</span>
-                <span class="filter-count"><span id="visible-count">{{ total_matched }}</span> / {{ total_matched }}</span>
-                <button type="button" class="btn btn-small" id="clear-filters">Clear</button>
+                <span class="filter-count" role="status" aria-live="polite" aria-atomic="true"><span id="visible-count">{{ total_matched }}</span> / {{ total_matched }} <span class="sr-only">cards visible</span></span>
             </div>
             <div class="filter-active-summary" id="filter-active-summary"></div>
         </summary>
 
         <div class="filter-bar-body">
+            <div class="filter-bar-actions">
+                <button type="button" class="btn btn-small" id="clear-filters">Clear filters</button>
+            </div>
+            {% if filter_colors %}
+            <div class="filter-section">
+                <label class="filter-mode-toggle" data-category="colors">
+                    <input type="checkbox" aria-label="Color filter mode: INCLUDES">
+                    <span class="filter-mode-label" aria-hidden="true">INCLUDES</span>
+                </label>
+                <span class="filter-section-label">Color</span>
+                <div class="filter-options">
+                    {% for color_code, color_name in filter_colors %}
+                    <button type="button" class="filter-btn" data-category="colors" data-value="{{ color_code }}" aria-label="{{ color_name }}">
+                        {% if color_code == 'C' %}
+                        {{ color_name }}
+                        {% else %}
+                        <span class="mana mana-{{ color_code }}" aria-hidden="true">{{ color_code }}</span>
+                        <span class="sr-only">{{ color_name }}</span>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% if filter_types %}
             <div class="filter-section">
                 <label class="filter-mode-toggle" data-category="types">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
+                    <input type="checkbox" aria-label="Type filter mode: OR">
+                    <span class="filter-mode-label" aria-hidden="true">OR</span>
                 </label>
                 <span class="filter-section-label">Type</span>
                 <div class="filter-options">
@@ -111,8 +137,8 @@
             {% if filter_tags_grouped %}
             <div class="filter-section filter-section-grouped">
                 <label class="filter-mode-toggle" data-category="tags">
-                    <input type="checkbox">
-                    <span class="filter-mode-label">OR</span>
+                    <input type="checkbox" aria-label="Matched Tags filter mode: OR">
+                    <span class="filter-mode-label" aria-hidden="true">OR</span>
                 </label>
                 <span class="filter-section-label">Matched Tags</span>
                 <div class="filter-options filter-options-grouped">
@@ -149,6 +175,7 @@
            target="_blank"
            rel="noopener"
            data-types="{{ card.types|join:',' }}"
+           data-colors="{{ card.colorIdentity|join:',' }}"
            data-rarity="{{ card.rarity|default:''|lower }}"
            data-mv="{{ card.mv_display }}"
            data-power="{{ card.power_display }}"
@@ -176,23 +203,39 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="no-results">
-        <p>No cards in {% for sd in set_displays %}{{ sd }}{% if not forloop.last %}, {% endif %}{% endfor %} match your selected themes.</p>
-        <p>Try selecting different themes or different sets.</p>
+    <div class="no-results" role="status">
+        <p>No cards in {% for sd in set_displays %}{{ sd }}{% if not forloop.last %}, {% endif %}{% endfor %} match your selected {% if set_mode %}oracle tags{% else %}themes{% endif %}.</p>
+        <p>Try selecting different {% if set_mode %}tags or sets{% else %}themes or sets{% endif %}.</p>
+        {% if set_mode %}
+        <p><a href="{% url 'finder:set_index' %}" class="btn btn-primary">Choose Different Sets</a></p>
+        {% endif %}
     </div>
     {% endif %}
 </div>
 {% endblock %}
 
 {% block extra_js %}
+{% if not set_mode %}
 {{ decklist_text|json_script:"decklist-text-data" }}
+{{ format_name|json_script:"format-name-data" }}
+{% endif %}
 {{ set_codes|json_script:"set-codes-data" }}
 {{ selected_tags_data|json_script:"selected-tags-data" }}
 <script>
 function backToAnalysis() {
     var form = document.createElement('form');
     form.method = 'POST';
-    form.action = "{% url 'finder:analyze' %}";
+    form.action = "{% if set_mode %}{% url 'finder:set_analyze' %}{% else %}{% url 'finder:analyze' %}{% endif %}";
+
+    function readJson(id, fallback) {
+        var node = document.getElementById(id);
+        if (!node) return fallback;
+        try {
+            return JSON.parse(node.textContent);
+        } catch (e) {
+            return fallback;
+        }
+    }
 
     var csrf = document.createElement('input');
     csrf.type = 'hidden';
@@ -200,15 +243,19 @@ function backToAnalysis() {
     csrf.value = '{{ csrf_token }}';
     form.appendChild(csrf);
 
+    {% if not set_mode %}
     // Use original decklist text (preserves quantities)
     var decklist = document.createElement('input');
     decklist.type = 'hidden';
     decklist.name = 'decklist';
-    decklist.value = JSON.parse(document.getElementById('decklist-text-data').textContent);
+    decklist.value = readJson('decklist-text-data', '');
     form.appendChild(decklist);
+    {% endif %}
 
     // Add set codes
-    JSON.parse(document.getElementById('set-codes-data').textContent).forEach(function(code) {
+    var setCodes = readJson('set-codes-data', []);
+    if (!Array.isArray(setCodes)) return;
+    setCodes.forEach(function(code) {
         var input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'set_code';
@@ -216,15 +263,18 @@ function backToAnalysis() {
         form.appendChild(input);
     });
 
+    {% if not set_mode %}
     // Add format
     var format = document.createElement('input');
     format.type = 'hidden';
     format.name = 'format_name';
-    format.value = '{{ format_name }}';
+    format.value = readJson('format-name-data', '');
     form.appendChild(format);
+    {% endif %}
 
     // Restore selected tags
-    var selectedTags = JSON.parse(document.getElementById('selected-tags-data').textContent);
+    var selectedTags = readJson('selected-tags-data', []);
+    if (!Array.isArray(selectedTags)) selectedTags = [];
     selectedTags.forEach(function(tag) {
         var input = document.createElement('input');
         input.type = 'hidden';
@@ -233,6 +283,7 @@ function backToAnalysis() {
         form.appendChild(input);
     });
 
+    {% if not set_mode %}
     // Restore include_lands
     {% if include_lands %}
     var landsInput = document.createElement('input');
@@ -240,6 +291,7 @@ function backToAnalysis() {
     landsInput.name = 'include_lands';
     landsInput.value = '1';
     form.appendChild(landsInput);
+    {% endif %}
     {% endif %}
 
     document.body.appendChild(form);
@@ -259,18 +311,36 @@ function backToAnalysis() {
     // Track active filters per category
     const activeFilters = {};
 
-    // Track AND/OR mode per category (false = OR, true = AND)
+    // Track filter modes (false = OR/INCLUDES, true = AND/ONLY)
     const filterModes = {};
+
+    const modeNames = {colors: 'Color', types: 'Type', tags: 'Matched Tags'};
+    const modeLabels = {
+        colors: ['INCLUDES', 'ONLY'],
+        types: ['OR', 'AND'],
+        tags: ['OR', 'AND'],
+    };
+
+    function syncModeToggle(toggle) {
+        const category = toggle.dataset.category;
+        const checkbox = toggle.querySelector('input');
+        const label = toggle.querySelector('.filter-mode-label');
+        const labels = modeLabels[category] || ['OR', 'AND'];
+        const mode = labels[checkbox.checked ? 1 : 0];
+        label.textContent = mode;
+        checkbox.setAttribute('aria-label', (modeNames[category] || category) + ' filter mode: ' + mode);
+    }
 
     // Mode toggle listeners
     modeToggles.forEach(toggle => {
         const category = toggle.dataset.category;
         const checkbox = toggle.querySelector('input');
-        const label = toggle.querySelector('.filter-mode-label');
+        filterModes[category] = false;
+        syncModeToggle(toggle);
 
         checkbox.addEventListener('change', () => {
             filterModes[category] = checkbox.checked;
-            label.textContent = checkbox.checked ? 'AND' : 'OR';
+            syncModeToggle(toggle);
             filterCards();
         });
     });
@@ -282,12 +352,11 @@ function backToAnalysis() {
         for (const key in activeFilters) {
             delete activeFilters[key];
         }
-        // Reset all toggles to OR
+        // Reset all toggles to their default mode
         modeToggles.forEach(toggle => {
             const checkbox = toggle.querySelector('input');
-            const label = toggle.querySelector('.filter-mode-label');
             checkbox.checked = false;
-            label.textContent = 'OR';
+            syncModeToggle(toggle);
         });
         for (const key in filterModes) {
             delete filterModes[key];
@@ -321,28 +390,41 @@ function backToAnalysis() {
         });
     });
 
-    const categoryLabels = {types: 'Type', rarity: 'Rarity', mv: 'Mana Value', power: 'Power', toughness: 'Toughness', tags: 'Matched Tags'};
+    const categoryLabels = {colors: 'Color', types: 'Type', rarity: 'Rarity', mv: 'Mana Value', power: 'Power', toughness: 'Toughness', tags: 'Matched Tags'};
+    const colorNames = {W: 'White', U: 'Blue', B: 'Black', R: 'Red', G: 'Green', C: 'Colorless'};
+
+    function displayFilterValue(category, value) {
+        if (category === 'colors') return colorNames[value] || value;
+        if (category === 'tags' && value.includes(':')) {
+            return value.split(':').slice(1).join(':');
+        }
+        return value.charAt(0).toUpperCase() + value.slice(1);
+    }
 
     function updateActiveSummary() {
-        activeSummary.innerHTML = '';
+        while (activeSummary.firstChild) activeSummary.removeChild(activeSummary.firstChild);
         for (const [category, values] of Object.entries(activeFilters)) {
             if (values.size === 0) continue;
             const line = document.createElement('div');
             line.className = 'filter-active-summary-line';
             const label = categoryLabels[category] || category;
             const isAnd = filterModes[category];
-            const separator = isAnd ? ' AND ' : ', ';
-            const valuesText = [...values].map(v => {
-                // Strip "Category:" prefix for tags
-                const display = category === 'tags' && v.includes(':') ? v.split(':').slice(1).join(':') : v;
-                return display.charAt(0).toUpperCase() + display.slice(1);
-            }).join(separator);
-            const badgeClass = isAnd ? 'summary-mode-and' : 'summary-mode-or';
-            const badgeText = isAnd ? 'AND' : 'OR';
-            const badge = values.size > 1
-                ? ' <span class="summary-mode-badge ' + badgeClass + '">' + badgeText + '</span>'
-                : '';
-            line.innerHTML = '<strong>' + label + ':</strong> <span class="summary-values">' + valuesText + '</span>' + badge;
+            const separator = isAnd ? (category === 'colors' ? ' + ' : ' AND ') : ', ';
+            const valuesText = [...values].map(v => displayFilterValue(category, v)).join(separator);
+            const strong = document.createElement('strong');
+            strong.textContent = label + ': ';
+            line.appendChild(strong);
+            const valuesSpan = document.createElement('span');
+            valuesSpan.className = 'summary-values';
+            valuesSpan.textContent = valuesText;
+            line.appendChild(valuesSpan);
+            if (values.size > 1 || category === 'colors') {
+                const badge = document.createElement('span');
+                const modeLabelsForCategory = modeLabels[category] || ['OR', 'AND'];
+                badge.className = 'summary-mode-badge ' + (isAnd ? 'summary-mode-and' : 'summary-mode-or');
+                badge.textContent = modeLabelsForCategory[isAnd ? 1 : 0];
+                line.appendChild(badge);
+            }
             activeSummary.appendChild(line);
         }
     }
@@ -374,6 +456,21 @@ function backToAnalysis() {
                     categoryMatch = values.has(item.dataset.power);
                 } else if (category === 'toughness') {
                     categoryMatch = values.has(item.dataset.toughness);
+                } else if (category === 'colors') {
+                    const itemColors = item.dataset.colors.split(',').filter(Boolean);
+                    const itemIsColorless = itemColors.length === 0 || (
+                        itemColors.length === 1 && itemColors[0] === 'C'
+                    );
+                    const itemFilterColors = itemIsColorless ? ['C'] : itemColors;
+                    const matchesColor = value => (
+                        value === 'C' ? itemIsColorless : itemColors.includes(value)
+                    );
+                    if (isAnd) {
+                        categoryMatch = itemFilterColors.length === values.size &&
+                            itemFilterColors.every(color => values.has(color));
+                    } else {
+                        categoryMatch = [...values].some(matchesColor);
+                    }
                 } else if (category === 'tags') {
                     const itemTags = item.dataset.tags.split(',').filter(Boolean);
                     if (isAnd) {

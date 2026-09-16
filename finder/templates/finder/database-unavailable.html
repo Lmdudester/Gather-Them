@@ -1,0 +1,16 @@
+{% extends "finder/base.html" %}
+{% block title %}Card Data Unavailable - Gather Them{% endblock %}
+
+{% block content %}
+<div class="maintenance-container">
+    <section class="maintenance-card database-unavailable" role="alert" aria-labelledby="database-unavailable-title">
+        <div class="maintenance-icon" aria-hidden="true">!</div>
+        <h1 id="database-unavailable-title">Card data is temporarily unavailable</h1>
+        <p>Gather Them cannot read the card data right now. Please try again in a moment.</p>
+        <div class="form-actions recovery-actions">
+            <a href="{% url 'finder:set_index' %}" class="btn btn-primary">Try Again</a>
+            <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

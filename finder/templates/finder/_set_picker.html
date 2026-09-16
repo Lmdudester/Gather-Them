@@ -1,0 +1,28 @@
+<div class="form-group set-selection-group">
+    <label for="set-search">{{ form.set_code.label }}</label>
+    <div class="set-picker">
+        <input type="text" id="set-search" class="set-search"
+               placeholder="Search sets..."
+               autocomplete="off"
+               role="combobox"
+               aria-expanded="false"
+               aria-controls="set-dropdown-listbox"
+               aria-autocomplete="list"
+               aria-activedescendant=""
+               aria-describedby="set-picker-hint set-code-error">
+        <div class="set-dropdown" id="set-dropdown-listbox" role="listbox"></div>
+    </div>
+    <div class="set-chips" aria-live="polite"></div>
+    <p class="sr-only" id="set-selection-status" role="status" aria-live="polite"></p>
+    {{ form.set_code }}
+    <p class="field-hint" id="set-picker-hint">Type to search, then choose one or more sets.</p>
+    <div class="field-errors" id="set-code-error" role="alert" aria-live="assertive"{% if not form.set_code.errors %} style="display:none"{% endif %}>
+        {% if form.set_code.errors %}
+            {% for error in form.set_code.errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        {% else %}
+            <p>Please select at least one target set.</p>
+        {% endif %}
+    </div>
+</div>

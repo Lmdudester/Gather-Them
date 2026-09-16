@@ -1,0 +1,59 @@
+{% extends "finder/base.html" %}
+{% load static %}
+{% block title %}Analyze Sets - Gather Them{% endblock %}
+
+{% block content %}
+<div class="container set-entry-container">
+    <h1>Analyze Set(s)</h1>
+    <p class="subtitle">Select one or more sets to rank oracle text patterns across their combined card pool.</p>
+
+    <form method="post" action="{% url 'finder:set_analyze' %}" class="set-form">
+        {% csrf_token %}
+        {% include "finder/_set_picker.html" %}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Analyze Set(s)</button>
+            <a href="{% url 'finder:index' %}" class="btn btn-secondary">Start Over</a>
+        </div>
+    </form>
+</div>
+
+{% url 'finder:random_flavor' as random_flavor_url %}
+{% include "finder/_loading_overlay.html" with loading_title="Analyzing selected sets" loading_copy="Analyzing selected cards..." loading_flavor_url=random_flavor_url %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'finder/js/set-picker.js' %}"></script>
+<script src="{% static 'finder/js/loading-overlay.js' %}"></script>
+<script>
+(function () {
+    var form = document.querySelector('.set-form');
+    var hiddenSelect = document.getElementById('id_set_code');
+    var searchInput = document.getElementById('set-search');
+    var setError = document.getElementById('set-code-error');
+    if (!form || !hiddenSelect || !searchInput || !setError) return;
+
+    if (setError.style.display !== 'none') {
+        searchInput.classList.add('invalid');
+        searchInput.setAttribute('aria-invalid', 'true');
+        searchInput.focus();
+        setError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function validate() {
+        if (hiddenSelect.selectedOptions.length) {
+            setError.style.display = 'none';
+            searchInput.removeAttribute('aria-invalid');
+            return true;
+        }
+        setError.style.display = '';
+        searchInput.classList.add('invalid');
+        searchInput.setAttribute('aria-invalid', 'true');
+        searchInput.focus();
+        setError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return false;
+    }
+
+    window.setupLoadingOverlay(form, validate);
+})();
+</script>
+{% endblock %}

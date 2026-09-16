@@ -1,16 +1,22 @@
 # Gather Them - MTG Card Finder
 
-A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks. Paste a decklist, select one or more target sets, and find cards that match your deck's themes.
+A Django web app that helps Magic: The Gathering players discover relevant cards from new sets for their existing decks, or explore a set directly through its oracle text. Paste a decklist or select one or more target sets, then find cards that match the resulting themes.
 
 **Note:** This is mostly a pet project for me, but I wanted to do something I'd actually consider using myself. I'm experimenting with practical uses for Claude Code to advance my knowledge in the area.
 
 ## How It Works
 
-**Three-step flow:**
+**Deck discovery flow:**
 
 1. **Paste your decklist** — supports common formats (`1 Card Name`, `1x Card Name`), section headers (Commander, Sideboard, etc.), and 100-card singleton decks
 2. **Review extracted themes** — the app analyzes your deck and extracts themes across six categories (subtypes, keywords, card types, supertypes, oracle text patterns, stat profiles), organized into tiers by frequency
 3. **Browse matching cards** — see cards from the target sets that match your selected themes, filtered by format legality and color identity, with Scryfall card images. Cards already in your deck are automatically excluded.
+
+**Direct set analysis flow:**
+
+1. **Select sets** — choose one or more sets without entering a decklist.
+2. **Review oracle tags** — the app ranks configured oracle text patterns by the number of distinct cards containing them.
+3. **Browse matching cards** — select oracle tags and use the same card viewer, filters, sorting, images, and Scryfall links.
 
 ## Features
 
@@ -19,12 +25,13 @@ A Django web app that helps Magic: The Gathering players discover relevant cards
 - **Color identity enforcement** — results only include cards within your deck's color identity
 - **Tiered theme ranking** — themes are sorted into Core / Strong / Moderate / Minor / Fringe columns based on how prevalent they are in your deck
 - **Combined & category views** — analysis page defaults to a unified tier list across all categories; toggle to per-category view
-- **Results page filtering** — filter matched cards in real time by Type, Rarity, Mana Value, Power, Toughness, or Matched Tags, with per-category AND/OR toggles and a live "X / Y cards visible" counter
+- **Results page filtering** — filter matched cards in real time by Color, Type, Rarity, Mana Value, Power, Toughness, or Matched Tags, with Color INCLUDES/ONLY and Type/Matched Tags AND/OR toggles plus a live "X / Y cards visible" counter
 - **Scryfall card images & links** — results display card art from Scryfall's CDN, with each card linking directly to its Scryfall page
 - **3-step card name lookup** — exact name, then front face name (for DFCs/adventures like Bonecrusher Giant), then prefix match
 - **Dedicated land discovery** — "Include All Lands" toggle finds non-basic lands using intersection-based color identity (lands sharing at least one color with your deck), separate from theme analysis
 - **Deck card exclusion** — cards already in your decklist are filtered out of results
 - **Multi-set search** — select multiple target sets via a searchable picker
+- **Direct set oracle analysis** — analyze up to 100 selected sets as one card pool, including singleton oracle patterns, without deck format or color filters
 - **Playable sets only** — filters to expansions, core sets, commander products, masters sets, and similar, sorted by release date
 - **One-click database update** — download the latest MTGJSON data from within the app, with a maintenance page shown during the update
 - **Hot-reloadable oracle patterns** — patterns are stored in a JSON config file (`finder/data/oracle_patterns.json`) and can be reloaded at runtime via a button on the homepage, no server restart needed
@@ -111,14 +118,16 @@ finder/
     theme_extractor.py  Theme extraction and frequency ranking
     oracle_patterns.py  JSON loader with thread-safe caching and hot-reload
     set_filter.py     Filter set cards by selected theme tags
+    set_selection.py  Set-mode normalization and safe selection limits
   templatetags/
     card_extras.py    Template filters (Scryfall URLs, tag display)
-  templates/finder/   Server-rendered HTML templates
+  templates/finder/   Server-rendered HTML templates, including set analysis and recovery states
   static/finder/css/  Dark theme responsive CSS
+  static/finder/js/   Accessible set picker and loading overlay behavior
   static/finder/img/  Site logo (favicon + header)
   middleware.py       Maintenance mode middleware for database updates
-  forms.py            Decklist form with set and format dropdowns
-  views.py            Views: index, analyze, results, update_db, refresh_patterns, random_flavor
+  forms.py            Decklist and direct set-analysis forms
+  views.py            Deck and set-analysis views plus maintenance/API endpoints
 scripts/
   entrypoint-autoupdate.sh  Docker entrypoint: clones latest code, installs deps, runs server
 ```
